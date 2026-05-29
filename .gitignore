@@ -14,3 +14,7 @@
 !assets/*.svg
 !edge_exporter_lite/
 !edge_exporter_lite/**
+
+!.github/
+!.github/workflows/
+!.github/workflows/deploy.yml
