@@ -3500,7 +3500,7 @@
                         </div>
                         <ul class="support-list">
                             <li><strong>ChatGPT 官方导出 ZIP</strong>：对话文本、图片（用户上传 + 生成图）、标题与创建/更新时间</li>
-                            <li><strong>DeepSeek 新版导出 ZIP</strong>：完整对话树（REQUEST / THINK / RESPONSE / SEARCH / TOOL_*）、工具调用过程与搜索结果、标题与时间、重新生成的备选回复</li>
+                            <li><strong>DeepSeek 新版导出 ZIP</strong>：完整对话树（REQUEST / THINK / RESPONSE / SEARCH / TOOL_*）、SEARCH 搜索结果（标题/链接/摘要/来源网站）、标题与时间、重新生成的备选回复</li>
                             <li><strong>DeepSeek 旧版导出 ZIP</strong>（chat.csv / coder.csv）：角色、文本、消息时间与标题</li>
                             <li><strong>Grok 官方导出 ZIP</strong>（prod-grok-backend.json）：会话标题、消息内容、时间与角色</li>
                             <li><strong>Qwen 官方导出 JSON</strong>（仅 chat.qwen.ai）：标题、时间戳、回答正文、深度思考摘要、联网搜索摘要、工具调用信息</li>
@@ -3518,7 +3518,7 @@
                         </div>
                         <ul class="support-list">
                             <li><strong>ChatGPT</strong>：账号信息、收藏/归档状态、插件/Gizmo、群聊、消息反馈、Sora 视频、购物数据</li>
-                            <li><strong>DeepSeek</strong>：无法区分模型模式（快速/专家/识图）；思考时长不可用；工具调用的搜索词和链接已清空；语音消息、文件附件不支持</li>
+                            <li><strong>DeepSeek</strong>：无法区分模型模式（快速/专家/识图）；思考时长不可用；TOOL_SEARCH/TOOL_OPEN/READ_LINK/TOOL_FIND 的搜索词和网页内容已清空（仅 SEARCH 搜索结果保留）；语音消息、文件附件不支持</li>
                             <li><strong>Qwen</strong>：国内版通义千问（qianwen.com）无对话导出入口</li>
                             <li><strong>通用限制</strong>：消息编辑历史、已删除消息、实时对话状态、精确 token 用量均不在导出范围内</li>
                         </ul>
