@@ -4181,7 +4181,7 @@
             'TOOL_OPEN':   { toolName: 'open_page',   placeholder: '打开的页面未包含在导出数据中' },
             'TOOL_FIND':   { toolName: 'find_content', placeholder: '查找内容未导出' },
             'READ_LINK':   { toolName: 'read_link',   placeholder: '读取的链接内容未包含在导出数据中' },
-            'SEARCH':      { toolName: 'web_search', isSearch: true }
+            'SEARCH':      { toolName: 'web_search' }
         };
 
         /**
@@ -13358,17 +13358,15 @@
                 const message = nodeData.message;
 
                 if (message && message.fragments) {
-                    // 收集同一 node 内所有 assistant-side parts（THINK + TOOL_* + RESPONSE）
                     let requestContent = null;
                     const assistantParts = [];
                     const fragmentTimestamp = formatISO8601(message.inserted_at);
 
-                    // 处理 fragments 数组
-                    for (const fragment of message.fragments) {
+                    for (let fi = 0; fi < message.fragments.length; fi++) {
+                        const fragment = message.fragments[fi];
                         const ftype = fragment.type;
 
                         if (ftype === 'REQUEST') {
-                            // flush 待处理的 assistant 消息
                             if (assistantParts.length > 0) {
                                 messages.push({
                                     id: generateUUID(),
@@ -13395,25 +13393,27 @@
                             const cfg = TOOL_FRAGMENT_CONFIG[ftype];
                             if (!cfg) continue;
 
-                            if (cfg.isSearch) {
-                                // SEARCH: 读取 results 数组 → tool_result
+                            if (ftype === 'SEARCH') {
+                                // SEARCH: 搜索结果作为 Tool part 的 output
                                 const results = Array.isArray(fragment.results) ? fragment.results : [];
                                 if (results.length > 0) {
-                                    const lines = results.map(function(r, idx) {
-                                        const title = r.title || '';
-                                        const snippet = r.snippet || '';
-                                        const site = r.site_name || '';
-                                        const url = r.url || '';
-                                        return '[' + (idx + 1) + '] ' + title + '\n    来源: ' + site + '\n    摘要: ' + snippet + '\n    链接: ' + url;
+                                    const outputParts = results.map(function(r, idx) {
+                                        return createTextPart(
+                                            '[' + (idx + 1) + '] ' + (r.title || '') +
+                                            '\n来源: ' + (r.site_name || '') +
+                                            '\n' + (r.snippet || '') +
+                                            '\n链接: ' + (r.url || '')
+                                        );
                                     });
-                                    assistantParts.push(createToolResultPart(
+                                    assistantParts.push(createToolPart(
                                         generateUUID(),
                                         cfg.toolName,
-                                        lines.join('\n\n')
+                                        '',
+                                        outputParts
                                     ));
                                 }
                             } else {
-                                // TOOL_SEARCH / TOOL_OPEN / TOOL_FIND / READ_LINK: tool_call + 占位
+                                // TOOL_SEARCH / TOOL_OPEN / TOOL_FIND / READ_LINK
                                 assistantParts.push(createToolPart(
                                     generateUUID(),
                                     cfg.toolName,
