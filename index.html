@@ -4189,21 +4189,25 @@
             },
             'SEARCH': {
                 rikkaTool: 'deepseek_web_search',
-                input: JSON.stringify({ query: '' }),
-                outputText: null,  // 动态生成：从 results 构建 items
+                input: JSON.stringify({}),
+                outputText: null,  // 动态生成：从 results 构建
                 outputBuilder: function(results) {
                     var items = [];
                     for (var i = 0; i < results.length; i++) {
                         var r = results[i];
                         items.push({
-                            id: generateUUID().substring(0, 6),
                             index: i + 1,
                             title: r.title || '',
                             url: r.url || '',
-                            text: r.snippet || ''
+                            snippet: r.snippet || '',
+                            site_name: r.site_name || '',
+                            published_at: r.published_at || null
                         });
                     }
-                    return JSON.stringify({ items: items, answer: null });
+                    return JSON.stringify({
+                        total_results: results.length,
+                        items: items
+                    });
                 }
             },
             'TOOL_OPEN': {
