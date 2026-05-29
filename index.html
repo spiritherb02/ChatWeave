@@ -4177,20 +4177,20 @@
 
         // ================================================================
         // DeepSeek Fragment → RikkaHub 工具映射表
-        // 使用 RikkaHub 不内置识别的工具名，走 GenericToolPreview 渲染：
-        //   展开后显示工具名 + 参数(input) + 结果(output) 的原始 JSON
+        // 使用不匹配 ToolNames 的工具名，走 GenericToolPreview：
+        //   展开后显示工具名 + 参数 + 结果的原始 JSON
+        // 所有工具 hasOutput=true 确保 isExecuted=true → onClick 可展开
         // ================================================================
         const DEEPSEEK_TOOL_MAP = {
             'TOOL_SEARCH': {
-                rikkaTool: 'deepseek_web_search',                     // 不匹配 ToolNames → GenericToolPreview
+                rikkaTool: 'deepseek_web_search',
                 input: JSON.stringify({ query: '' }),
-                hasOutput: false,
-                outputBuilder: null
+                outputText: JSON.stringify({ _note: 'DeepSeek导出已清除搜索输入内容' })
             },
             'SEARCH': {
                 rikkaTool: 'deepseek_web_search',
                 input: JSON.stringify({ query: '' }),
-                hasOutput: true,
+                outputText: null,  // 动态生成：从 results 构建 items
                 outputBuilder: function(results) {
                     var items = [];
                     for (var i = 0; i < results.length; i++) {
@@ -4209,20 +4209,17 @@
             'TOOL_OPEN': {
                 rikkaTool: 'deepseek_open_page',
                 input: JSON.stringify({ url: '' }),
-                hasOutput: false,
-                outputBuilder: null
+                outputText: JSON.stringify({ _note: 'DeepSeek导出未包含页面内容' })
             },
             'READ_LINK': {
                 rikkaTool: 'deepseek_read_link',
                 input: JSON.stringify({ url: '' }),
-                hasOutput: false,
-                outputBuilder: null
+                outputText: JSON.stringify({ _note: 'DeepSeek导出未包含链接内容' })
             },
             'TOOL_FIND': {
                 rikkaTool: 'deepseek_find_content',
                 input: JSON.stringify({ url: '' }),
-                hasOutput: false,
-                outputBuilder: null
+                outputText: JSON.stringify({ _note: 'DeepSeek导出已清除查找内容' })
             }
         };
 
@@ -13438,47 +13435,26 @@
                                 assistantParts.push(createTextPart(fragment.content));
                             }
                         } else {
-                            // ── 工具 Fragment 处理：对齐 RikkaHub 内置工具格式 ──
-                            const mapping = DEEPSEEK_TOOL_MAP[ftype];
-                            if (!mapping) continue;
+                            // ── 工具 Fragment：对齐 RikkaHub GenericToolPreview ──
+                            var map = DEEPSEEK_TOOL_MAP[ftype];
+                            if (!map) continue;
 
-                            const toolCallId = generateUUID();
-                            const input = String(mapping.input || '');
+                            var outputText = map.outputText || '';
 
-                            if (mapping.hasOutput && mapping.outputBuilder) {
-                                // 有输出：创建已执行的 Tool part（output 非空 → isExecuted=true）
-                                // SEARCH 等 fragment 携带实际结果数据
-                                let outputText = '';
-                                if (ftype === 'SEARCH') {
-                                    const results = Array.isArray(fragment.results) ? fragment.results : [];
-                                    if (results.length > 0) {
-                                        outputText = mapping.outputBuilder(results);
-                                    }
+                            // 动态输出构建器（如 SEARCH 从 results 生成 items）
+                            if (map.outputBuilder && ftype === 'SEARCH') {
+                                var results = Array.isArray(fragment.results) ? fragment.results : [];
+                                if (results.length > 0) {
+                                    outputText = map.outputBuilder(results);
                                 }
-                                if (outputText) {
-                                    assistantParts.push(createToolPart(
-                                        toolCallId,
-                                        mapping.rikkaTool,
-                                        input,
-                                        [createTextPart(outputText)]
-                                    ));
-                                } else {
-                                    // 有 outputBuilder 但无有效数据（如空 results）
-                                    assistantParts.push(createToolPart(
-                                        toolCallId,
-                                        mapping.rikkaTool,
-                                        input
-                                    ));
-                                }
-                            } else {
-                                // 无输出：创建未执行的 Tool part（output 空 → isExecuted=false）
-                                // TOOL_SEARCH/TOOL_OPEN/READ_LINK/TOOL_FIND 等 DeepSeek 已清除内容
-                                assistantParts.push(createToolPart(
-                                    toolCallId,
-                                    mapping.rikkaTool,
-                                    input
-                                ));
                             }
+
+                            assistantParts.push(createToolPart(
+                                generateUUID(),
+                                map.rikkaTool,
+                                String(map.input || ''),
+                                [createTextPart(String(outputText || ''))]
+                            ));
                         }
                     }
 
