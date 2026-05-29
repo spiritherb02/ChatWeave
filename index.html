@@ -4183,14 +4183,14 @@
         // ================================================================
         const DEEPSEEK_TOOL_MAP = {
             'TOOL_SEARCH': {
-                rikkaTool: 'deepseek_web_search',
-                input: JSON.stringify({ query: '' }),
-                outputText: JSON.stringify({ _note: 'DeepSeek导出已清除搜索输入内容' })
+                rikkaTool: 'TOOL_SEARCH',
+                input: JSON.stringify({}),
+                outputText: JSON.stringify({ _note: '搜索输入内容未导出' })
             },
             'SEARCH': {
-                rikkaTool: 'deepseek_web_search',
+                rikkaTool: 'SEARCH',
                 input: JSON.stringify({}),
-                outputText: null,  // 动态生成：从 results 构建
+                outputText: null,
                 outputBuilder: function(results) {
                     var items = [];
                     for (var i = 0; i < results.length; i++) {
@@ -4211,19 +4211,19 @@
                 }
             },
             'TOOL_OPEN': {
-                rikkaTool: 'deepseek_open_page',
-                input: JSON.stringify({ url: '' }),
-                outputText: JSON.stringify({ _note: 'DeepSeek导出未包含页面内容' })
+                rikkaTool: 'TOOL_OPEN',
+                input: JSON.stringify({}),
+                outputText: JSON.stringify({ _note: '页面内容未导出' })
             },
             'READ_LINK': {
-                rikkaTool: 'deepseek_read_link',
-                input: JSON.stringify({ url: '' }),
-                outputText: JSON.stringify({ _note: 'DeepSeek导出未包含链接内容' })
+                rikkaTool: 'READ_LINK',
+                input: JSON.stringify({}),
+                outputText: JSON.stringify({ _note: '链接内容未导出' })
             },
             'TOOL_FIND': {
-                rikkaTool: 'deepseek_find_content',
-                input: JSON.stringify({ url: '' }),
-                outputText: JSON.stringify({ _note: 'DeepSeek导出已清除查找内容' })
+                rikkaTool: 'TOOL_FIND',
+                input: JSON.stringify({}),
+                outputText: JSON.stringify({ _note: '查找内容未导出' })
             }
         };
 
