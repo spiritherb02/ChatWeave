@@ -4177,25 +4177,21 @@
 
         // ================================================================
         // DeepSeek Fragment → RikkaHub 工具映射表
-        // 严格对齐 RikkaHub 内置工具的 input/output schema：
-        //   search_web  → input: {"query":"..."},  output: {"items":[...],"answer":null}
-        //   scrape_web  → input: {"url":"..."},     output: {"urls":[...]}
+        // 使用 RikkaHub 不内置识别的工具名，走 GenericToolPreview 渲染：
+        //   展开后显示工具名 + 参数(input) + 结果(output) 的原始 JSON
         // ================================================================
         const DEEPSEEK_TOOL_MAP = {
-            // ── search_web 系列 ──
             'TOOL_SEARCH': {
-                rikkaTool: 'search_web',                          // RikkaHub 内置工具名
-                input: JSON.stringify({ query: '' }),             // 输入参数（DeepSeek 已清除搜索词）
-                hasOutput: false,                                 // 无结果（DeepSeek 清除了搜索内容）
+                rikkaTool: 'deepseek_web_search',                     // 不匹配 ToolNames → GenericToolPreview
+                input: JSON.stringify({ query: '' }),
+                hasOutput: false,
                 outputBuilder: null
             },
             'SEARCH': {
-                rikkaTool: 'search_web',
+                rikkaTool: 'deepseek_web_search',
                 input: JSON.stringify({ query: '' }),
-                hasOutput: true,                                  // SEARCH fragment 携带 results 数组
+                hasOutput: true,
                 outputBuilder: function(results) {
-                    // 对齐 SearchTools.kt:60-70 的 items 格式
-                    // items[].id (6-char str), .index (int), .title, .url, .text
                     var items = [];
                     for (var i = 0; i < results.length; i++) {
                         var r = results[i];
@@ -4210,21 +4206,20 @@
                     return JSON.stringify({ items: items, answer: null });
                 }
             },
-            // ── scrape_web 系列 ──
             'TOOL_OPEN': {
-                rikkaTool: 'scrape_web',                         // 对应 SearchTools.kt:81 scrape_web
-                input: JSON.stringify({ url: '' }),              // DeepSeek 已清除实际 URL
+                rikkaTool: 'deepseek_open_page',
+                input: JSON.stringify({ url: '' }),
                 hasOutput: false,
                 outputBuilder: null
             },
             'READ_LINK': {
-                rikkaTool: 'scrape_web',
+                rikkaTool: 'deepseek_read_link',
                 input: JSON.stringify({ url: '' }),
                 hasOutput: false,
                 outputBuilder: null
             },
             'TOOL_FIND': {
-                rikkaTool: 'scrape_web',                         // 最接近"页面内查找"的内置工具
+                rikkaTool: 'deepseek_find_content',
                 input: JSON.stringify({ url: '' }),
                 hasOutput: false,
                 outputBuilder: null
