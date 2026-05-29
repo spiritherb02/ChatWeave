@@ -16,6 +16,7 @@ It focuses on one thing: import, review, edit, and merge chat history into a Rik
 - ChatGPT official export ZIP
 - DeepSeek export ZIP (new and old formats)
 - Grok official export ZIP
+- Qwen official export JSON (chat.qwen.ai)
 - Exported JSON from YourAIScroll or ChatWeave Exporter
 - Markdown paste flow for single-conversation imports
 - RikkaHub backup merge output
@@ -47,7 +48,7 @@ node sync_version.js
 Bump to a new version (supports prerelease like `-beta.1`) and sync all targets:
 
 ```bash
-node sync_version.js 1.7.2-beta.1
+node sync_version.js 1.8.0
 ```
 
 This script updates:
@@ -74,4 +75,4 @@ ChatWeave is designed for local processing. Keep your original exports and backu
 
 ## Project Link
 
-- GitHub: `https://github.com/SpiritHerb/ChatWeave`
+- GitHub: `https://github.com/spiritherb02/ChatWeave`
