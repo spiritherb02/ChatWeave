@@ -3133,8 +3133,8 @@
                 <span class="mission-pill" id="missionPill3">可回滚</span>
             </div>
             <div class="mission-actions">
-                <button class="btn-text mission-action-primary" id="missionPrimaryBtn" type="button" onclick="openModal('usage')">开始带回熟悉的 ta</button>
-                <button class="btn-text mission-action-secondary" id="missionSecondaryBtn" type="button" onclick="openModal('usage')">了解使用方法</button>
+                <button class="btn-text mission-action-primary" id="missionPrimaryBtn" type="button" onclick="openModal('usage')">开始使用</button>
+                <button class="btn-text mission-action-secondary" id="missionSecondaryBtn" type="button" onclick="openModal('about')">了解更多</button>
             </div>
         </div>
 
@@ -3154,6 +3154,7 @@
         <div class="button-group">
             <button class="btn-text" id="usageBtn" onclick="openModal('usage')">📖 使用说明</button>
             <button class="btn-text" id="supportBtn" onclick="openModal('support')">📋 支持列表</button>
+            <button class="btn-text" id="aboutBtn" onclick="openModal('about')">ℹ️ 关于</button>
             <button class="btn-text" id="languageToggleBtn" onclick="toggleLanguage()">🌐 EN</button>
         </div>
 
@@ -3540,16 +3541,25 @@
             </div>
             <div class="modal-body">
                 <h2 style="font-size: 24px; margin-bottom: 4px;">ChatWeave</h2>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">v1.8.0 · 跨平台 AI 聊天记录迁移工具</p>
-                <p style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
-                    把 ChatGPT、DeepSeek、Grok、Qwen 等平台的聊天记录，整理后导出为 RikkaHub 可导入的备份包。<br>
-                    所有处理在浏览器本地完成，不经过服务器。
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">v1.8.0 · 跨平台 AI 聊天记录迁移工具</p>
+
+                <p style="line-height: 1.8; margin-bottom: 12px;">
+                    ChatWeave 是一个浏览器端的对话迁移工具：把 ChatGPT、DeepSeek、Grok、Qwen 等平台的聊天记录导出后，整理、编辑、合并为 RikkaHub 可导入的备份包。
                 </p>
-                <p style="margin-top: 12px;">
+                <p style="line-height: 1.8; color: var(--text-secondary); font-size: 13px;">
+                    所有数据处理在本地浏览器完成，不上传任何服务器。<br>
+                    本工具为社区项目，与各 AI 平台及 RikkaHub 均无官方从属关系。
+                </p>
+
+                <div style="margin-top: 16px; display: flex; gap: 16px;">
                     <a href="https://github.com/spiritherb02/ChatWeave" target="_blank" class="about-link">GitHub</a>
-                    &nbsp;·&nbsp;
                     <a href="https://rikka-ai.com/" target="_blank" class="about-link">RikkaHub 官网</a>
-                </p>
+                </div>
+
+                <div style="margin-top: 20px; padding: 16px; background: var(--card-bg); border-radius: 12px; text-align: center;">
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">如果这个工具帮到了你，欢迎扫码支持后续维护 ☕</p>
+                    <img src="https://rewardreiso.spiritherb.top" alt="赞赏码" style="max-width: 180px; border-radius: 12px;">
+                </div>
 
                 <h3 style="margin-top: 24px; margin-bottom: 10px; font-size: 16px;">🎨 主题</h3>
                 <div style="margin-bottom: 16px;">
@@ -3559,40 +3569,25 @@
                 </div>
                 <div class="theme-grid">
                     <div class="theme-card" data-theme="sakura" onclick="applyTheme('sakura', this)" title="樱花粉">
-                        <div class="theme-preview">
-                            <div style="background: #8E4955; border-radius: 50%; width: 40px; height: 40px;"></div>
-                        </div>
+                        <div class="theme-preview"><div style="background: #8E4955; border-radius: 50%; width: 40px; height: 40px;"></div></div>
                         <span>樱花粉</span>
                     </div>
                     <div class="theme-card active" data-theme="ocean" onclick="applyTheme('ocean', this)" title="海湾蓝">
-                        <div class="theme-preview">
-                            <div style="background: #116682; border-radius: 50%; width: 40px; height: 40px;"></div>
-                        </div>
+                        <div class="theme-preview"><div style="background: #116682; border-radius: 50%; width: 40px; height: 40px;"></div></div>
                         <span>海湾蓝</span>
                     </div>
                     <div class="theme-card" data-theme="spring" onclick="applyTheme('spring', this)" title="原野绿">
-                        <div class="theme-preview">
-                            <div style="background: #4C662B; border-radius: 50%; width: 40px; height: 40px;"></div>
-                        </div>
+                        <div class="theme-preview"><div style="background: #4C662B; border-radius: 50%; width: 40px; height: 40px;"></div></div>
                         <span>原野绿</span>
                     </div>
                     <div class="theme-card" data-theme="autumn" onclick="applyTheme('autumn', this)" title="秋黄">
-                        <div class="theme-preview">
-                            <div style="background: #735C0C; border-radius: 50%; width: 40px; height: 40px;"></div>
-                        </div>
+                        <div class="theme-preview"><div style="background: #735C0C; border-radius: 50%; width: 40px; height: 40px;"></div></div>
                         <span>秋黄</span>
                     </div>
                     <div class="theme-card" data-theme="black" onclick="applyTheme('black', this)" title="中性黑">
-                        <div class="theme-preview">
-                            <div style="background: #606060; border-radius: 50%; width: 40px; height: 40px;"></div>
-                        </div>
+                        <div class="theme-preview"><div style="background: #606060; border-radius: 50%; width: 40px; height: 40px;"></div></div>
                         <span>中性黑</span>
                     </div>
-                </div>
-
-                <div style="margin-top: 24px; padding: 12px; background: var(--card-bg); border-radius: 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.7; text-align: center;">
-                    社区项目 · 与各平台无官方从属关系 · 本地处理不上传<br>
-                    <span style="opacity: 0.6;">如果帮到了你，欢迎 <a href="https://github.com/spiritherb02/ChatWeave" target="_blank" style="color: var(--text-secondary);">Star ⭐</a></span>
                 </div>
             </div>
         </div>
