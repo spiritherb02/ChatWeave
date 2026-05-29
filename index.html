@@ -4175,13 +4175,60 @@
                 .filter(msg => msg && Array.isArray(msg.parts) && msg.parts.length > 0);
         }
 
-        // DeepSeek Fragment 类型到 ToolCall 的映射配置
-        const TOOL_FRAGMENT_CONFIG = {
-            'TOOL_SEARCH': { toolName: 'web_search',  placeholder: '搜索内容未导出' },
-            'TOOL_OPEN':   { toolName: 'open_page',   placeholder: '打开的页面未包含在导出数据中' },
-            'TOOL_FIND':   { toolName: 'find_content', placeholder: '查找内容未导出' },
-            'READ_LINK':   { toolName: 'read_link',   placeholder: '读取的链接内容未包含在导出数据中' },
-            'SEARCH':      { toolName: 'web_search' }
+        // ================================================================
+        // DeepSeek Fragment → RikkaHub 工具映射表
+        // 严格对齐 RikkaHub 内置工具的 input/output schema：
+        //   search_web  → input: {"query":"..."},  output: {"items":[...],"answer":null}
+        //   scrape_web  → input: {"url":"..."},     output: {"urls":[...]}
+        // ================================================================
+        const DEEPSEEK_TOOL_MAP = {
+            // ── search_web 系列 ──
+            'TOOL_SEARCH': {
+                rikkaTool: 'search_web',                          // RikkaHub 内置工具名
+                input: JSON.stringify({ query: '' }),             // 输入参数（DeepSeek 已清除搜索词）
+                hasOutput: false,                                 // 无结果（DeepSeek 清除了搜索内容）
+                outputBuilder: null
+            },
+            'SEARCH': {
+                rikkaTool: 'search_web',
+                input: JSON.stringify({ query: '' }),
+                hasOutput: true,                                  // SEARCH fragment 携带 results 数组
+                outputBuilder: function(results) {
+                    // 对齐 SearchTools.kt:60-70 的 items 格式
+                    // items[].id (6-char str), .index (int), .title, .url, .text
+                    var items = [];
+                    for (var i = 0; i < results.length; i++) {
+                        var r = results[i];
+                        items.push({
+                            id: generateUUID().substring(0, 6),
+                            index: i + 1,
+                            title: r.title || '',
+                            url: r.url || '',
+                            text: r.snippet || ''
+                        });
+                    }
+                    return JSON.stringify({ items: items, answer: null });
+                }
+            },
+            // ── scrape_web 系列 ──
+            'TOOL_OPEN': {
+                rikkaTool: 'scrape_web',                         // 对应 SearchTools.kt:81 scrape_web
+                input: JSON.stringify({ url: '' }),              // DeepSeek 已清除实际 URL
+                hasOutput: false,
+                outputBuilder: null
+            },
+            'READ_LINK': {
+                rikkaTool: 'scrape_web',
+                input: JSON.stringify({ url: '' }),
+                hasOutput: false,
+                outputBuilder: null
+            },
+            'TOOL_FIND': {
+                rikkaTool: 'scrape_web',                         // 最接近"页面内查找"的内置工具
+                input: JSON.stringify({ url: '' }),
+                hasOutput: false,
+                outputBuilder: null
+            }
         };
 
         /**
@@ -13332,6 +13379,12 @@
         }
 
         function extractDeepSeekMessages(mapping, deepseekModelId) {
+            // RikkaHub 2.2.6+ 使用 v2 Part 格式（Tool part 必须有 input/output/approvalState）
+            // 确保生成时使用正确格式，否则搜索结果等工具调用无法正常显示
+            if (outputPartTypeFormat !== 'v2' && (loadedRikkaDbUserVersion >= 14 || !rikkahubData)) {
+                outputPartTypeFormat = 'v2';
+            }
+
             const messages = [];
 
             // 找到根节点
@@ -13390,34 +13443,45 @@
                                 assistantParts.push(createTextPart(fragment.content));
                             }
                         } else {
-                            const cfg = TOOL_FRAGMENT_CONFIG[ftype];
-                            if (!cfg) continue;
+                            // ── 工具 Fragment 处理：对齐 RikkaHub 内置工具格式 ──
+                            const mapping = DEEPSEEK_TOOL_MAP[ftype];
+                            if (!mapping) continue;
 
-                            if (ftype === 'SEARCH') {
-                                // SEARCH: 搜索结果作为 Tool part 的 output
-                                const results = Array.isArray(fragment.results) ? fragment.results : [];
-                                if (results.length > 0) {
-                                    const outputParts = results.map(function(r, idx) {
-                                        return createTextPart(
-                                            '[' + (idx + 1) + '] ' + (r.title || '') +
-                                            '\n来源: ' + (r.site_name || '') +
-                                            '\n' + (r.snippet || '') +
-                                            '\n链接: ' + (r.url || '')
-                                        );
-                                    });
+                            const toolCallId = generateUUID();
+                            const input = String(mapping.input || '');
+
+                            if (mapping.hasOutput && mapping.outputBuilder) {
+                                // 有输出：创建已执行的 Tool part（output 非空 → isExecuted=true）
+                                // SEARCH 等 fragment 携带实际结果数据
+                                let outputText = '';
+                                if (ftype === 'SEARCH') {
+                                    const results = Array.isArray(fragment.results) ? fragment.results : [];
+                                    if (results.length > 0) {
+                                        outputText = mapping.outputBuilder(results);
+                                    }
+                                }
+                                if (outputText) {
                                     assistantParts.push(createToolPart(
-                                        generateUUID(),
-                                        cfg.toolName,
-                                        '',
-                                        outputParts
+                                        toolCallId,
+                                        mapping.rikkaTool,
+                                        input,
+                                        [createTextPart(outputText)]
+                                    ));
+                                } else {
+                                    // 有 outputBuilder 但无有效数据（如空 results）
+                                    assistantParts.push(createToolPart(
+                                        toolCallId,
+                                        mapping.rikkaTool,
+                                        input
                                     ));
                                 }
                             } else {
-                                // TOOL_SEARCH / TOOL_OPEN / TOOL_FIND / READ_LINK
+                                // 无输出：创建未执行的 Tool part（output 空 → isExecuted=false）
+                                // TOOL_SEARCH/TOOL_OPEN/READ_LINK/TOOL_FIND 等 DeepSeek 已清除内容
                                 assistantParts.push(createToolPart(
-                                    generateUUID(),
-                                    cfg.toolName,
-                                    cfg.placeholder
+                                    toolCallId,
+                                    mapping.rikkaTool,
+                                    input
                                 ));
                             }
                         }
