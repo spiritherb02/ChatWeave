@@ -12175,6 +12175,7 @@
             let createTime = Date.now();
             let updateTime = createTime;
             let messages = [];
+            let messageNodes = null;
 
             if (sourceType === 'chatgpt') {
                 const sourceConversationId = conv.conversation_id || conv.id || '';
@@ -12207,6 +12208,10 @@
                     messages = editedMessages.length > 0
                         ? convertEditableMessagesToRikkaMessages(editedMessages, modelId)
                         : (mapping ? extractDeepSeekMessages(mapping, modelId) : []);
+                    // Branch-aware message nodes for regenerated replies → RikkaHub arrow switching
+                    if (editedMessages.length === 0 && mapping) {
+                        messageNodes = extractDeepSeekBranchMessageNodes(mapping, modelId);
+                    }
                 } else {
                     const sourceConversationId = conv.id || '';
                     const fallbackKey = `${conv.title || ''}|${conv.created_at || ''}|${conv.updated_at || ''}`;
@@ -12305,7 +12310,8 @@
                 title,
                 createTime,
                 updateTime,
-                messages
+                messages,
+                messageNodes
             };
         }
 
@@ -12686,7 +12692,8 @@
                         updateTime: payload.updateTime,
                         bindingIndex: idx,
                         expectedMessageCount: messages.length,
-                        messages: useLowMemoryMergeMode ? null : messages
+                        messages: useLowMemoryMergeMode ? null : messages,
+                        messageNodes: useLowMemoryMergeMode ? null : (payload.messageNodes || null)
                     });
 
                     if (idx % 10 === 0) {
@@ -12763,6 +12770,10 @@
                         const reboundPayload = buildMergeConversationPayload(reboundBinding, assistantInfoBySource, imageFiles);
                         const reboundMessages = Array.isArray(reboundPayload?.messages) ? reboundPayload.messages : [];
                         messages = normalizeMessagesForOutputFormat(reboundMessages, outputPartTypeFormat);
+                        // 低内存模式 rebind：同时恢复 messageNodes，确保分支切换箭头可用
+                        if (!prepared.messageNodes && reboundPayload?.messageNodes && Array.isArray(reboundPayload.messageNodes)) {
+                            prepared.messageNodes = reboundPayload.messageNodes;
+                        }
                     }
 
                     if (!Array.isArray(messages) || messages.length === 0) {
@@ -12787,22 +12798,41 @@
                     const conversationInsertValues = insertConversationColumns.map(columnName => conversationInsertValueMap[columnName]);
                     mergedDb.run(insertConversationSql, conversationInsertValues);
 
-                    for (let i = 0; i < messages.length; i++) {
-                        const nodeId = generateUUID();
-                        const messageJson = JSON.stringify([messages[i]]);
-                        mergedDb.run(`
-                            INSERT INTO ${messageNodeTableSql}
-                            (id, conversation_id, node_index, messages, select_index)
-                            VALUES (?, ?, ?, ?, ?)
-                        `, [nodeId, convId, i, messageJson, 0]);
+                    const messageNodes = Array.isArray(prepared.messageNodes) ? prepared.messageNodes : null;
+
+                    if (messageNodes && messageNodes.length > 0) {
+                        // Branch-aware write: use MessageNodeEntry[] from extractDeepSeekBranchMessageNodes
+                        // Same nodeIndex across multiple rows = RikkaHub parallel branches (arrow switching UI)
+                        for (var mi = 0; mi < messageNodes.length; mi++) {
+                            var entry = messageNodes[mi];
+                            var nodeId = generateUUID();
+                            var messageJson = JSON.stringify(entry.messages);
+                            mergedDb.run(`
+                                INSERT INTO ${messageNodeTableSql}
+                                (id, conversation_id, node_index, messages, select_index)
+                                VALUES (?, ?, ?, ?, ?)
+                            `, [nodeId, convId, entry.nodeIndex, messageJson, entry.selectIndex || 0]);
+                        }
+                        actualInsertedMessageCount += messageNodes.length;
+                    } else {
+                        for (let i = 0; i < messages.length; i++) {
+                            const nodeId = generateUUID();
+                            const messageJson = JSON.stringify([messages[i]]);
+                            mergedDb.run(`
+                                INSERT INTO ${messageNodeTableSql}
+                                (id, conversation_id, node_index, messages, select_index)
+                                VALUES (?, ?, ?, ?, ?)
+                            `, [nodeId, convId, i, messageJson, 0]);
+                        }
+                        actualInsertedMessageCount += messages.length;
                     }
 
                     existingConversationIds.add(convId);
                     convertedCount++;
-                    actualInsertedMessageCount += messages.length;
 
                     if (useLowMemoryMergeMode) {
                         prepared.messages = null;
+                        prepared.messageNodes = null;
                         preparedConversations[idx] = null;
                     }
 
@@ -13374,6 +13404,108 @@
             return typeof matched?.name === 'string' ? matched.name : '';
         }
 
+        /**
+         * Extract UIMessage objects from a single DeepSeek mapping node.
+         * Handles REQUEST/THINK/RESPONSE/TOOL fragment types within one node's message.fragments.
+         * Used by both the flat extractDeepSeekMessages() (preview) and the branch-aware
+         * extractDeepSeekBranchMessageNodes() (merge) to avoid duplicating fragment logic.
+         * @param {object} nodeData - DeepSeek mapping node data (with message.fragments)
+         * @param {string} deepseekModelId - Model ID to assign to assistant messages
+         * @returns {UIMessage[]} Array of UIMessage objects derived from this node's fragments
+         */
+        function extractMessagesFromDeepSeekNode(nodeData, deepseekModelId) {
+            const messages = [];
+            const message = nodeData && nodeData.message;
+            if (!message || !message.fragments) return messages;
+
+            let requestContent = null;
+            const assistantParts = [];
+            const fragmentTimestamp = formatISO8601(message.inserted_at);
+
+            for (let fi = 0; fi < message.fragments.length; fi++) {
+                const fragment = message.fragments[fi];
+                const ftype = fragment.type;
+
+                if (ftype === 'REQUEST') {
+                    if (assistantParts.length > 0) {
+                        messages.push({
+                            id: generateUUID(),
+                            role: 'assistant',
+                            parts: assistantParts.splice(0),
+                            annotations: [],
+                            createdAt: formatLocalDateTime(message.inserted_at),
+                            finishedAt: null,
+                            modelId: deepseekModelId,
+                            usage: null,
+                            translation: null
+                        });
+                    }
+                    requestContent = fragment.content;
+                } else if (ftype === 'THINK') {
+                    if (fragment.content && fragment.content.trim()) {
+                        assistantParts.push(createReasoningPart(fragment.content, fragmentTimestamp));
+                    }
+                } else if (ftype === 'RESPONSE') {
+                    if (fragment.content && fragment.content.trim()) {
+                        assistantParts.push(createTextPart(fragment.content));
+                    }
+                } else {
+                    // ── 工具 Fragment：对齐 RikkaHub GenericToolPreview ──
+                    var map = DEEPSEEK_TOOL_MAP[ftype];
+                    if (!map) continue;
+
+                    var outputText = map.outputText || '';
+
+                    // 动态输出构建器（如 SEARCH 从 results 生成 items）
+                    if (map.outputBuilder && ftype === 'SEARCH') {
+                        var results = Array.isArray(fragment.results) ? fragment.results : [];
+                        if (results.length > 0) {
+                            outputText = map.outputBuilder(results);
+                        }
+                    }
+
+                    assistantParts.push(createToolPart(
+                        generateUUID(),
+                        map.rikkaTool,
+                        String(map.input || ''),
+                        [createTextPart(String(outputText || ''))]
+                    ));
+                }
+            }
+
+            // 如果有用户输入，创建用户消息
+            if (requestContent && requestContent.trim()) {
+                messages.push({
+                    id: generateUUID(),
+                    role: 'user',
+                    parts: [createTextPart(requestContent)],
+                    annotations: [],
+                    createdAt: formatLocalDateTime(message.inserted_at),
+                    finishedAt: null,
+                    modelId: deepseekModelId,
+                    usage: null,
+                    translation: null
+                });
+            }
+
+            // flush 剩余的 assistant parts
+            if (assistantParts.length > 0) {
+                messages.push({
+                    id: generateUUID(),
+                    role: 'assistant',
+                    parts: assistantParts.splice(0),
+                    annotations: [],
+                    createdAt: formatLocalDateTime(message.inserted_at),
+                    finishedAt: null,
+                    modelId: deepseekModelId,
+                    usage: null,
+                    translation: null
+                });
+            }
+
+            return messages;
+        }
+
         function extractDeepSeekMessages(mapping, deepseekModelId) {
             // RikkaHub 2.2.6+ 使用 v2 Part 格式（Tool part 必须有 input/output/approvalState）
             // 确保生成时使用正确格式，否则搜索结果等工具调用无法正常显示
@@ -13404,94 +13536,9 @@
                 traversedCount++;
 
                 const nodeData = mapping[nodeId];
-                const message = nodeData.message;
-
-                if (message && message.fragments) {
-                    let requestContent = null;
-                    const assistantParts = [];
-                    const fragmentTimestamp = formatISO8601(message.inserted_at);
-
-                    for (let fi = 0; fi < message.fragments.length; fi++) {
-                        const fragment = message.fragments[fi];
-                        const ftype = fragment.type;
-
-                        if (ftype === 'REQUEST') {
-                            if (assistantParts.length > 0) {
-                                messages.push({
-                                    id: generateUUID(),
-                                    role: 'assistant',
-                                    parts: assistantParts.splice(0),
-                                    annotations: [],
-                                    createdAt: formatLocalDateTime(message.inserted_at),
-                                    finishedAt: null,
-                                    modelId: deepseekModelId,
-                                    usage: null,
-                                    translation: null
-                                });
-                            }
-                            requestContent = fragment.content;
-                        } else if (ftype === 'THINK') {
-                            if (fragment.content && fragment.content.trim()) {
-                                assistantParts.push(createReasoningPart(fragment.content, fragmentTimestamp));
-                            }
-                        } else if (ftype === 'RESPONSE') {
-                            if (fragment.content && fragment.content.trim()) {
-                                assistantParts.push(createTextPart(fragment.content));
-                            }
-                        } else {
-                            // ── 工具 Fragment：对齐 RikkaHub GenericToolPreview ──
-                            var map = DEEPSEEK_TOOL_MAP[ftype];
-                            if (!map) continue;
-
-                            var outputText = map.outputText || '';
-
-                            // 动态输出构建器（如 SEARCH 从 results 生成 items）
-                            if (map.outputBuilder && ftype === 'SEARCH') {
-                                var results = Array.isArray(fragment.results) ? fragment.results : [];
-                                if (results.length > 0) {
-                                    outputText = map.outputBuilder(results);
-                                }
-                            }
-
-                            assistantParts.push(createToolPart(
-                                generateUUID(),
-                                map.rikkaTool,
-                                String(map.input || ''),
-                                [createTextPart(String(outputText || ''))]
-                            ));
-                        }
-                    }
-
-                    // 如果有用户输入，创建用户消息
-                    if (requestContent && requestContent.trim()) {
-                        messages.push({
-                            id: generateUUID(),
-                            role: 'user',
-                            parts: [createTextPart(requestContent)],
-                            annotations: [],
-                            createdAt: formatLocalDateTime(message.inserted_at),
-                            finishedAt: null,
-                            modelId: deepseekModelId,
-                            usage: null,
-                            translation: null
-                        });
-                    }
-
-                    // flush 剩余的 assistant parts
-                    if (assistantParts.length > 0) {
-                        messages.push({
-                            id: generateUUID(),
-                            role: 'assistant',
-                            parts: assistantParts.splice(0),
-                            annotations: [],
-                            createdAt: formatLocalDateTime(message.inserted_at),
-                            finishedAt: null,
-                            modelId: deepseekModelId,
-                            usage: null,
-                            translation: null
-                        });
-                    }
-                }
+                // Delegate fragment processing to shared helper (also used by extractDeepSeekBranchMessageNodes)
+                const nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
+                messages.push(...nodeMessages);
 
                 // 保留所有分支（含重新生成的备选回复），RikkaHub 支持切换查看
                 const children = Array.isArray(nodeData.children) ? nodeData.children : [];
@@ -13507,6 +13554,104 @@
                 });
             }
             return messages;
+        }
+
+        /**
+         * Extract branch-aware MessageNode entries from a DeepSeek mapping tree.
+         * Uses path-aware DFS to detect branch points (nodeData.children.length > 1) and
+         * produces parallel MessageNodeEntry entries at the same nodeIndex for each branch.
+         * RikkaHub renders same-nodeIndex rows as switchable variants (arrow UI).
+         *
+         * Non-branch paths: each message gets sequential nodeIndex (same as flat path).
+         * Branch paths: children of a branch point ALL start from the same nodeIndex,
+         *   creating parallel entries. Only the user-continued branch has further entries.
+         *
+         * @param {object} mapping - DeepSeek mapping object
+         * @param {string} deepseekModelId - Model ID for assistant messages
+         * @returns {MessageNodeEntry[]} Array of {nodeIndex, messages, selectIndex, branchId?}
+         */
+        function extractDeepSeekBranchMessageNodes(mapping, deepseekModelId) {
+            // RikkaHub 2.2.6+ 使用 v2 Part 格式（Tool part 必须有 input/output/approvalState）
+            // 确保生成时使用正确格式，否则搜索结果等工具调用无法正常显示
+            if (outputPartTypeFormat !== 'v2' && (loadedRikkaDbUserVersion >= 14 || !rikkahubData)) {
+                outputPartTypeFormat = 'v2';
+            }
+
+            const result = [];
+            const rootId = Object.keys(mapping).find(function(id) { return mapping[id].id === 'root'; });
+            if (!rootId) return result;
+
+            const visitedNodeIds = new Set();
+            const mappingSize = mapping && typeof mapping === 'object' ? Object.keys(mapping).length : 0;
+            const maxTraversal = Math.max(mappingSize + 8, 10000);
+            let traversedCount = 0;
+            let branchCounter = 0;
+            let nodeIndexCounter = 0;
+
+            /**
+             * Recursively walk a node and its descendants.
+             * When children.length > 1, each child starts from the SAME nodeIndexCounter value,
+             * producing parallel MessageNodeEntry entries at identical nodeIndex for RikkaHub branch UI.
+             * @param {string} nodeId - Current node ID in the mapping
+             * @param {string|null} branchId - Branch identifier (null/undefined for non-branch main path)
+             */
+            function walkNode(nodeId, branchId) {
+                if (!nodeId || !mapping[nodeId] || visitedNodeIds.has(nodeId)) return;
+                if (traversedCount >= maxTraversal) return;
+
+                visitedNodeIds.add(nodeId);
+                traversedCount++;
+
+                const nodeData = mapping[nodeId];
+                const nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
+
+                // Each message from this node becomes its own MessageNodeEntry
+                for (var mi = 0; mi < nodeMessages.length; mi++) {
+                    var entry = {
+                        nodeIndex: nodeIndexCounter++,
+                        messages: [nodeMessages[mi]],
+                        selectIndex: 0
+                    };
+                    if (branchId) {
+                        entry.branchId = branchId;
+                    }
+                    result.push(entry);
+                }
+
+                const children = Array.isArray(nodeData.children) ? nodeData.children : [];
+
+                if (children.length === 0) {
+                    // 叶节点：路径结束
+                    return;
+                } else if (children.length === 1) {
+                    // 单子节点：沿相同路径继续，保留相同 branchId
+                    walkNode(children[0], branchId);
+                } else {
+                    // 🔀 分支点（再生回复）：每个子节点从同一 nodeIndexCounter 开始
+                    // 相同 nodeIndex 的多行 → RikkaHub 切换箭头
+                    var savedIndex = nodeIndexCounter;
+                    for (var ci = 0; ci < children.length; ci++) {
+                        if (ci > 0) {
+                            nodeIndexCounter = savedIndex;
+                        }
+                        var childBranchId = branchId
+                            ? branchId + '.' + ci
+                            : String(branchCounter++);
+                        walkNode(children[ci], childBranchId);
+                    }
+                }
+            }
+
+            walkNode(rootId, null);
+
+            if (traversedCount >= maxTraversal) {
+                console.warn('deepseek branch node traversal reached safety limit, possible deep or cyclic chain', {
+                    maxTraversal: maxTraversal,
+                    rootId: rootId
+                });
+            }
+
+            return result;
         }
 
         function extractDeepSeekOldMessages(conversation, deepseekModelId) {
