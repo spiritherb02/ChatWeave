@@ -4405,7 +4405,7 @@
                 'warning.item2': '建议完整导入而非逐条测试——ChatWeave 会处理冲突，不会覆盖已有对话',
                 'warning.item3': '导入后如有异常：清空 RikkaHub 数据 → 导入刚才保存的备份 → 恢复原状',
                 'warning.item4': '模型会迭代，但对话记录可以跟着你走',
-                'warning.item5': '💬 交流群：1095819862  点击加群',
+                'warning.item5': '💬 交流群：1095819862 &nbsp;<a href="https://qm.qq.com/q/KROboDRxC2" target="_blank" style="color: var(--md-sys-color-primary);">点击加群</a>',
                 'btn.usage': '📖 使用说明',
                 'btn.support': '📋 支持列表明细',
                 'btn.about': 'ℹ️ 关于',
@@ -4596,7 +4596,7 @@
                 'warning.item2': 'Run a 1-3 conversation test merge before full merge',
                 'warning.item3': 'If import behaves abnormally, rollback by restoring original backup',
                 'warning.item4': 'Models change, but your conversations can stay portable and editable',
-                'warning.item5': '💬 QQ Group: 1095819862  Join',
+                'warning.item5': '💬 QQ Group: 1095819862 &nbsp;<a href="https://qm.qq.com/q/KROboDRxC2" target="_blank" style="color: var(--md-sys-color-primary);">Join</a>',
                 'btn.usage': '📖 Guide',
                 'btn.support': '📋 Support Matrix',
                 'btn.about': 'ℹ️ About',
@@ -5243,7 +5243,9 @@
             setText('warningItem2', 'warning.item2');
             setText('warningItem3', 'warning.item3');
             setText('warningItem4', 'warning.item4');
-            setText('warningItem5', 'warning.item5');
+            // warningItem5 含 HTML 链接，需用 innerHTML
+            const _elWarningItem5 = document.getElementById('warningItem5');
+            if (_elWarningItem5) _elWarningItem5.innerHTML = t('warning.item5');
             setText('usageBtn', 'btn.usage');
             setText('supportBtn', 'btn.support');
             setText('aboutBtn', 'btn.about');
