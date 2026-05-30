@@ -13585,7 +13585,6 @@
             const mappingSize = mapping && typeof mapping === 'object' ? Object.keys(mapping).length : 0;
             const maxTraversal = Math.max(mappingSize + 8, 10000);
             let traversedCount = 0;
-            let branchCounter = 0;
             let nodeIndexCounter = 0;
 
             /**
@@ -13605,39 +13604,55 @@
                 const nodeData = mapping[nodeId];
                 const nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
 
-                // Each message from this node becomes its own MessageNodeEntry
                 for (var mi = 0; mi < nodeMessages.length; mi++) {
-                    var entry = {
+                    result.push({
                         nodeIndex: nodeIndexCounter++,
                         messages: [nodeMessages[mi]],
                         selectIndex: 0
-                    };
-                    if (branchId) {
-                        entry.branchId = branchId;
-                    }
-                    result.push(entry);
+                    });
                 }
 
                 const children = Array.isArray(nodeData.children) ? nodeData.children : [];
 
                 if (children.length === 0) {
-                    // 叶节点：路径结束
                     return;
                 } else if (children.length === 1) {
-                    // 单子节点：沿相同路径继续，保留相同 branchId
                     walkNode(children[0], branchId);
                 } else {
-                    // 🔀 分支点（再生回复）：每个子节点从同一 nodeIndexCounter 开始
-                    // 相同 nodeIndex 的多行 → RikkaHub 切换箭头
-                    var savedIndex = nodeIndexCounter;
+                    // 🔀 分支点（再生回复）：收集所有子节点的 assistant 消息到同一个 MessageNode
+                    // RikkaHub 模型：一个 node 的 messages 包含多个 assistant 变体，select_index 切换
+                    var branchAssistants = [];
+                    var lastChildId = children[children.length - 1];
+
                     for (var ci = 0; ci < children.length; ci++) {
-                        if (ci > 0) {
-                            nodeIndexCounter = savedIndex;
+                        var childId = children[ci];
+                        var childData = mapping[childId];
+                        if (!childData) continue;
+                        var childMsgs = extractMessagesFromDeepSeekNode(childData, deepseekModelId);
+                        for (var cmi = 0; cmi < childMsgs.length; cmi++) {
+                            if (childMsgs[cmi].role === 'assistant') {
+                                branchAssistants.push(childMsgs[cmi]);
+                            }
                         }
-                        var childBranchId = branchId
-                            ? branchId + '.' + ci
-                            : String(branchCounter++);
-                        walkNode(children[ci], childBranchId);
+                        visitedNodeIds.add(childId);
+                        traversedCount++;
+                    }
+
+                    if (branchAssistants.length > 0) {
+                        result.push({
+                            nodeIndex: nodeIndexCounter++,
+                            messages: branchAssistants,
+                            selectIndex: 0
+                        });
+                    }
+
+                    // 仅从最后一个子节点继续遍历（延续对话）
+                    var lastNode = mapping[lastChildId];
+                    if (lastNode) {
+                        var grandChildren = Array.isArray(lastNode.children) ? lastNode.children : [];
+                        for (var gi = 0; gi < grandChildren.length; gi++) {
+                            walkNode(grandChildren[gi], branchId);
+                        }
                     }
                 }
             }
