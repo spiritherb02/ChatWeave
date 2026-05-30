@@ -2161,6 +2161,80 @@
             }
         }
 
+        /* 底部滑出面板 (Bottom Sheet) — 替代全屏modal，手机友好 */
+        .bottom-sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .bottom-sheet-overlay.active {
+            display: flex;
+        }
+        .bottom-sheet {
+            background: var(--md-sys-color-surface);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 700px;
+            max-height: 75vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+            animation: sheetSlideUp 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        @keyframes sheetSlideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+        }
+        .bottom-sheet-handle {
+            width: 36px; height: 4px;
+            background: var(--md-sys-color-outline-variant);
+            border-radius: 2px;
+            margin: 10px auto 0;
+            flex-shrink: 0;
+        }
+        .bottom-sheet .modal-header {
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .bottom-sheet .modal-body {
+            padding: 20px 24px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* 合并内联状态条 */
+        .merge-status-bar {
+            display: none;
+            padding: 10px 16px;
+            margin-top: 8px;
+            background: var(--md-sys-color-surface-container-high);
+            border-radius: var(--md-sys-shape-corner-medium);
+            font-size: 13px;
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.4;
+            border-left: 3px solid var(--md-sys-color-primary);
+            animation: statusSlideIn 0.25s ease;
+        }
+        .merge-status-bar.active {
+            display: block;
+        }
+        .merge-status-bar .spinner-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            margin-right: 6px;
+            background: var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: dotPulse 1s infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; }
+            50%       { opacity: 1; }
+        }
+
         .modal-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -3271,6 +3345,11 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
 
+        <!-- 合并内联状态条 -->
+        <div class="merge-status-bar" id="mergeStatusBar">
+            <span class="spinner-dot"></span><span id="mergeStatusText"></span>
+        </div>
+
         <!-- 网格加载动画 -->
         <div class="grid-loading-container" id="gridLoading" style="display: none;">
             <div class="grid-loading">
@@ -3311,8 +3390,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="mergeDryRunModal" onclick="closeMergeDryRunModalOnOverlay(event)">
-        <div class="modal" style="max-width: 700px;">
+    <div class="bottom-sheet-overlay" id="mergeDryRunModal" onclick="closeMergeDryRunModalOnOverlay(event)">
+        <div class="bottom-sheet">
+            <div class="bottom-sheet-handle"></div>
             <div class="modal-header">
                 <h3 class="modal-title">🧪 合并前确认（不会写入数据）</h3>
                 <button class="modal-close" onclick="closeMergeDryRunModal(false)">×</button>
@@ -3345,8 +3425,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="mergeDownloadModal" onclick="closeMergeDownloadModalOnOverlay(event)">
-        <div class="modal" style="max-width: 620px;">
+    <div class="bottom-sheet-overlay" id="mergeDownloadModal" onclick="closeMergeDownloadModalOnOverlay(event)">
+        <div class="bottom-sheet">
+            <div class="bottom-sheet-handle"></div>
             <div class="modal-header">
                 <h3 class="modal-title">✅ 合并已完成，确认后下载</h3>
                 <button class="modal-close" onclick="closeMergeDownloadModal(true)">×</button>
@@ -3556,6 +3637,14 @@
                 <div style="margin-top: 20px; padding: 16px; background: var(--card-bg); border-radius: 12px; text-align: center;">
                     <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">如果这个工具帮到了你，欢迎扫码支持后续维护 ☕</p>
                     <img src="https://rewardreiso.spiritherb.top" alt="赞赏码" style="max-width: 180px; border-radius: 12px;">
+                </div>
+
+                <div style="margin-top: 16px; padding: 16px; background: var(--card-bg); border-radius: 12px;">
+                    <p style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">💬 交流群</p>
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                        群号：<strong>1095819862</strong><br>
+                        <a href="https://qm.qq.com/q/KROboDRxC2" target="_blank" class="about-link">👉 点击加入 QQ 群</a>
+                    </p>
                 </div>
 
                 <h3 style="margin-top: 24px; margin-bottom: 10px; font-size: 16px;">🎨 主题</h3>
@@ -4540,11 +4629,11 @@
                 'error.mergeUnknownSchema': '无法识别 RikkaHub 对话表结构。检测到表: {tableList}',
                 'error.mergeReadConversationTable': '无法读取对话表: {message}',
                 'summary.mergeDryRun': '已选 {selected} 个对话，预计新增 {added} 个对话 / {messages} 条消息，跳过 {skipped} 个。',
-                'success.mergeCompleted': '合并完成！已写入 {convCount} 个对话 / {msgCount} 条消息。{duplicateText}{keepBothText}{emptySkipText}{warningText}\\n{assistantStrategyText}\\n{titleHint}\\n已生成下载包，请在弹窗中确认下载。\\n不会影响原有的 RikkaHub 对话。',
-                'success.mergeDuplicate': '\\n跳过 {count} 个重复对话（已存在）',
-                'success.mergeKeepBoth': '\\n发现 {count} 个 ID 冲突，已按“保留并另存”生成新对话 ID。',
-                'success.mergeEmptySkip': '\\n跳过 {count} 个空对话（转换后无有效消息）。',
-                'success.mergeWarning': '\\n风险提示 {count} 条，请在下载弹窗查看详情。',
+                'success.mergeCompleted': '合并完成！已写入 {convCount} 个对话 / {msgCount} 条消息。{duplicateText}{keepBothText}{emptySkipText}{warningText}',
+                'success.mergeDuplicate': '<br>跳过 {count} 个重复对话',
+                'success.mergeKeepBoth': '<br>保留 {count} 个 ID 冲突为副本',
+                'success.mergeEmptySkip': '<br>跳过 {count} 个空对话',
+                'success.mergeWarning': '<br>共 {count} 条注意项，详见下方面板',
                 'success.titleHint.default': '对话标题保持导入来源的默认策略。',
                 'success.titleHint.chatgpt': 'ChatGPT 对话标题会自动添加 [ChatGPT] 前缀，方便识别。',
                 'success.titleHint.deepseek': 'DeepSeek 新版对话标题会自动添加 [DeepSeek] 前缀，旧版对话保留原标题。',
@@ -4731,11 +4820,11 @@
                 'error.mergeUnknownSchema': 'Unable to identify RikkaHub conversation table schema. Detected tables: {tableList}',
                 'error.mergeReadConversationTable': 'Failed to read conversation table: {message}',
                 'summary.mergeDryRun': 'Selected {selected} conversations. Estimated +{added} conversations / {messages} messages, skip {skipped}.',
-                'success.mergeCompleted': 'Merge completed! Written {convCount} conversations / {msgCount} messages.{duplicateText}{keepBothText}{emptySkipText}{warningText}\\n{assistantStrategyText}\\n{titleHint}\\nDownload package is ready, please confirm in popup.\\nOriginal RikkaHub conversations are not modified.',
-                'success.mergeDuplicate': '\\nSkipped {count} duplicate conversations (already existed).',
-                'success.mergeKeepBoth': '\\nDetected {count} ID conflicts, generated new IDs with keep-both strategy.',
-                'success.mergeEmptySkip': '\\nSkipped {count} empty conversations (no valid messages after conversion).',
-                'success.mergeWarning': '\\n{count} risk hints found. Check details in download popup.',
+                'success.mergeCompleted': 'Merge completed! {convCount} conversations / {msgCount} messages.{duplicateText}{keepBothText}{emptySkipText}{warningText}',
+                'success.mergeDuplicate': '<br>Skipped {count} duplicate conversations.',
+                'success.mergeKeepBoth': '<br>Kept {count} ID conflicts as copies.',
+                'success.mergeEmptySkip': '<br>Skipped {count} empty conversations.',
+                'success.mergeWarning': '<br>{count} warnings, see panel below.',
                 'success.titleHint.default': 'Conversation titles follow source default strategy.',
                 'success.titleHint.chatgpt': 'ChatGPT titles are prefixed with [ChatGPT] for easier recognition.',
                 'success.titleHint.deepseek': 'DeepSeek new titles are prefixed with [DeepSeek], legacy titles stay original.',
@@ -12038,6 +12127,20 @@
             showToast(t('toast.info'), message, 'info', 6000);
         }
 
+        function updateMergeStatus(message) {
+            const bar = document.getElementById('mergeStatusBar');
+            const text = document.getElementById('mergeStatusText');
+            if (bar && text) {
+                bar.classList.add('active');
+                text.textContent = message;
+            }
+        }
+
+        function clearMergeStatus() {
+            const bar = document.getElementById('mergeStatusBar');
+            if (bar) bar.classList.remove('active');
+        }
+
         function updateProgress(percent) {
             const progressBar = document.getElementById('progressBar');
             const progressFill = document.getElementById('progressFill');
@@ -12430,7 +12533,7 @@
             mergeButton.innerHTML = `<span class="circular-wavy-loading"><span class="wave"></span><span class="wave"></span><span class="wave"></span></span> ${t('merge.button.processing')}`;
 
             updateProgress(5);
-            showInfo(t('info.mergeInit'));
+            updateMergeStatus(t('info.mergeInit'));
             await new Promise(resolve => setTimeout(resolve, 50));
 
             let mergedDb = null;
@@ -12439,7 +12542,7 @@
 
             try {
                 updateProgress(10);
-                showInfo(t('info.mergeInitDb'));
+                updateMergeStatus(t('info.mergeInitDb'));
 
                 await initSQL();
                 mergedDb = new db.Database(rikkahubData);
@@ -12509,7 +12612,7 @@
                 const baselineConversationCount = existingConversationIds.size;
 
                 updateProgress(15);
-                showInfo(t('info.mergeCreateAssistant'));
+                updateMergeStatus(t('info.mergeCreateAssistant'));
 
                 let settings = rikkahubSettings || { assistants: [] };
                 const assistantMergeStrategy = getAssistantMergeStrategy();
@@ -12612,13 +12715,13 @@
                 }
 
                 updateProgress(18);
-                showInfo(t('info.mergePrepareImages'));
+                updateMergeStatus(t('info.mergePrepareImages'));
                 const chatgptImageIndexReport = await ensureChatGPTImageIndexForBindings(selectedBindings);
 
                 updateProgress(20);
-                showInfo(t('info.mergeProcessSources'));
+                updateMergeStatus(t('info.mergeProcessSources'));
                 if (useLowMemoryMergeMode) {
-                    showInfo(t('info.mergeLowMemoryMode'));
+                    updateMergeStatus(t('info.mergeLowMemoryMode'));
                 }
 
                 const sourceStats = {
@@ -12764,7 +12867,7 @@
                 });
 
                 updateProgress(45);
-                showInfo(t('info.mergeDryRunReady'));
+                updateMergeStatus(t('info.mergeDryRunReady'));
                 const dryRunConfirmed = await requestMergeDryRunConfirmation(
                     dryRunSummary,
                     dryRunDiffLines,
@@ -12780,7 +12883,7 @@
                 }
 
                 updateProgress(50);
-                showInfo(t('info.mergeWritingDb'));
+                updateMergeStatus(t('info.mergeWritingDb'));
                 mergedDb.run('BEGIN TRANSACTION');
                 transactionStarted = true;
 
@@ -12894,12 +12997,12 @@
                 }
 
                 updateProgress(85);
-                showInfo(t('info.mergePrepareDb'));
+                updateMergeStatus(t('info.mergePrepareDb'));
 
                 mergedDb.run('PRAGMA journal_mode = DELETE');
                 mergedDb.run('PRAGMA wal_checkpoint(TRUNCATE)');
 
-                showInfo(t('info.mergeGeneratingZip'));
+                updateMergeStatus(t('info.mergeGeneratingZip'));
 
                 const data = mergedDb.export();
                 mergedDb.close();
@@ -12966,7 +13069,7 @@
                 }
 
                 updateProgress(95);
-                showInfo(t('info.mergeGeneratingDownload'));
+                updateMergeStatus(t('info.mergeGeneratingDownload'));
 
                 const content = await zip.generateAsync({ type: 'blob' });
 
@@ -13026,6 +13129,7 @@
                     assistantStrategyText,
                     titleHint
                 }));
+                clearMergeStatus();
 
             } catch (error) {
                 if (mergedDb && transactionStarted) {
@@ -13038,6 +13142,7 @@
                 console.error('合并失败:', error);
                 console.error('错误堆栈:', error.stack);
                 showError(t('error.mergeFailed', { message: error.message, detail: error }));
+                clearMergeStatus();
             } finally {
                 if (mergedDb && !dbClosed) {
                     try {
