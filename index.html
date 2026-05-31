@@ -13005,6 +13005,7 @@
                     if (messageNodes && messageNodes.length > 0) {
                         // Branch-aware write: use MessageNodeEntry[] from extractDeepSeekBranchMessageNodes
                         // Same nodeIndex across multiple rows = RikkaHub parallel branches (arrow switching UI)
+                        var messageNodeTotalMessages = 0;
                         for (var mi = 0; mi < messageNodes.length; mi++) {
                             var entry = messageNodes[mi];
                             var nodeId = generateUUID();
@@ -13014,8 +13015,9 @@
                                 (id, conversation_id, node_index, messages, select_index)
                                 VALUES (?, ?, ?, ?, ?)
                             `, [nodeId, convId, entry.nodeIndex, messageJson, entry.selectIndex || 0]);
+                            messageNodeTotalMessages += (Array.isArray(entry.messages) ? entry.messages.length : 0);
                         }
-                        actualInsertedMessageCount += messageNodes.length;
+                        actualInsertedMessageCount += messageNodeTotalMessages;
                     } else {
                         for (let i = 0; i < messages.length; i++) {
                             const nodeId = generateUUID();
