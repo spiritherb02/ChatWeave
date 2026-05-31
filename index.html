@@ -13972,8 +13972,15 @@
                                     }
                                 }
                                 // 继续遍历后续节点
-                                for (var ngi = 0; ngi < nextGen.length; ngi++) {
-                                    walkNode(nextGen[ngi], branchId);
+                                // 修复：单子节点时 walk gcNode（中间节点）而非 nextGen（孙子），
+                                // 避免跳过中间节点的用户消息提取和其子节点的分支处理
+                                if (gcList.length === 1) {
+                                    walkNode(gcList[gi], branchId);
+                                } else {
+                                    // REQUEST 兄弟已处理（或混合子节点），走原逻辑
+                                    for (var ngi = 0; ngi < nextGen.length; ngi++) {
+                                        walkNode(nextGen[ngi], branchId);
+                                    }
                                 }
                                 continuationFound = true;
                             }
