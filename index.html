@@ -6727,17 +6727,18 @@
                 qwen: { sourceData: [], secondSourceData: [] }
             };
 
-            selectedBindings.forEach(binding => {
-                const sourceType = binding.item?.dataSource || currentDataSource;
+            for (var sbi = 0; sbi < selectedBindings.length; sbi++) {
+                var binding = selectedBindings[sbi];
+                var sourceType = (binding.item && binding.item.dataSource) || currentDataSource;
                 if (!bySource[sourceType]) {
                     bySource[sourceType] = { sourceData: [], secondSourceData: [] };
                 }
-                if (binding.item?.bucket === 'secondSourceData') {
+                if (binding.item && binding.item.bucket === 'secondSourceData') {
                     bySource[sourceType].secondSourceData.push(binding.conversation);
                 } else {
                     bySource[sourceType].sourceData.push(binding.conversation);
                 }
-            });
+            }
 
             return {
                 selectedItems: selectedItems,
