@@ -6608,9 +6608,18 @@
                     return msgs;
                 }
                 case 'deepseek': {
-                    const mapping = conversation.mapping;
+                    var mapping = conversation.mapping;
                     if (!mapping) return [];
-                    return extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
+                    var branchResult = extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
+                    // 安全兜底：如果分支提取结果远少于映射节点数，回退到线性遍历
+                    var mk = Object.keys(mapping).length;
+                    var bc = 0;
+                    for (var bci = 0; bci < branchResult.length; bci++) bc += (branchResult[bci].messages ? branchResult[bci].messages.length : 0);
+                    if (mk > 50 && bc < mk * 0.3) {
+                        console.warn('[ChatWeave] 预览: 分支提取过少 (' + bc + '/' + mk + ')，回退线性遍历');
+                        return extractDeepSeekMessages(mapping, 'deepseek-chat');
+                    }
+                    return branchResult;
                 }
                 case 'grok': {
                     const text = conversation.text || '';
@@ -12409,6 +12418,17 @@
                     // Branch-aware message nodes for regenerated replies → RikkaHub arrow switching
                     if (editedMessages.length === 0 && mapping) {
                         messageNodes = extractDeepSeekBranchMessageNodes(mapping, modelId);
+                        // 安全兜底：如果分支提取结果远少于映射节点数，回退到线性遍历
+                        var mappingKeys = Object.keys(mapping).length;
+                        var branchMsgCount = 0;
+                        for (var bmi = 0; bmi < messageNodes.length; bmi++) {
+                            branchMsgCount += (messageNodes[bmi].messages ? messageNodes[bmi].messages.length : 0);
+                        }
+                        if (mappingKeys > 50 && branchMsgCount < mappingKeys * 0.3) {
+                            console.warn('[ChatWeave] 分支提取结果过少 (' + branchMsgCount + '/' + mappingKeys + ')，回退到线性遍历');
+                            messages = extractDeepSeekMessages(mapping, modelId);
+                            messageNodes = null; // 用扁平消息代替分支节点
+                        }
                     }
                     // 优先使用工作台编辑器保存的分支节点
                     if (Array.isArray(conv._editedMessageNodes) && conv._editedMessageNodes.length > 0 && conv._editedMessageNodes.some(function(n) { return n.messages.length > 1; })) {
@@ -13964,11 +13984,59 @@
 
             walkNode(rootId, null);
 
+            // 诊断统计
+            var totalNodes = Object.keys(mapping).length;
+            var nodesWithFragments = 0;
+            var nodesWithContent = 0;
+            var emptyNodes = 0;
+            var branchPoints = 0;
+            Object.keys(mapping).forEach(function(k) {
+                var m = mapping[k] && mapping[k].message;
+                if (!m) { emptyNodes++; return; }
+                if (m.fragments && Array.isArray(m.fragments) && m.fragments.length > 0) nodesWithFragments++;
+                else if (m.content) nodesWithContent++;
+                else emptyNodes++;
+                var ch = mapping[k].children;
+                if (Array.isArray(ch) && ch.length > 1) branchPoints++;
+            });
+            var totalOutputMessages = 0;
+            for (var ri = 0; ri < result.length; ri++) {
+                totalOutputMessages += (result[ri].messages ? result[ri].messages.length : 0);
+            }
+            console.log('[ChatWeave] DeepSeek 提取诊断:', {
+                映射节点数: totalNodes,
+                含fragments节点: nodesWithFragments,
+                含content节点: nodesWithContent,
+                空节点: emptyNodes,
+                分支点数: branchPoints,
+                已遍历节点: traversedCount,
+                遍历上限: maxTraversal,
+                达到上限: traversedCount >= maxTraversal,
+                输出节点数: result.length,
+                输出消息数: totalOutputMessages,
+                未遍历节点: totalNodes - visitedNodeIds.size
+            });
+
             if (traversedCount >= maxTraversal) {
-                console.warn('deepseek branch node traversal reached safety limit, possible deep or cyclic chain', {
+                console.warn('[ChatWeave] ⚠️ 遍历达到上限！', {
                     maxTraversal: maxTraversal,
-                    rootId: rootId
+                    visited: visitedNodeIds.size,
+                    total: totalNodes,
+                    skipped: totalNodes - visitedNodeIds.size
                 });
+            }
+
+            if (visitedNodeIds.size < totalNodes) {
+                console.warn('[ChatWeave] ⚠️ 有 ' + (totalNodes - visitedNodeIds.size) + ' 个节点未被遍历！');
+                // 显示前10个未遍历节点
+                var unvisited = [];
+                Object.keys(mapping).forEach(function(k) {
+                    if (!visitedNodeIds.has(k) && unvisited.length < 10) {
+                        var n = mapping[k];
+                        unvisited.push({id: k, parent: n.parent, children: (n.children||[]).length, hasMsg: !!(n.message)});
+                    }
+                });
+                console.warn('[ChatWeave] 未遍历节点样本:', unvisited);
             }
 
             return result;
