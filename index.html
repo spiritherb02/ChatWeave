@@ -13895,99 +13895,67 @@
                         });
                     }
 
-                    // 仅从最后一个子节点继续遍历（延续对话）
-                    var lastNode = mapping[lastChildId];
-                    if (lastNode) {
-                        var grandChildren = Array.isArray(lastNode.children) ? lastNode.children : [];
-                        
-                        // 🔀 检测 REQUEST 兄弟节点 = 编辑后的用户消息变体（如"好的"→"不错"）
-                        // 将它们收集到同一个 message_node，对齐 RikkaHub 的扁平变体模型
-                        if (grandChildren.length > 1) {
-                            var allRequest = true;
-                            for (var gci = 0; gci < grandChildren.length; gci++) {
-                                var gcn = mapping[grandChildren[gci]];
-                                var gcnMsgs = gcn ? extractMessagesFromDeepSeekNode(gcn, deepseekModelId) : [];
-                                var hasUser = false;
-                                for (var gm = 0; gm < gcnMsgs.length; gm++) {
-                                    if (gcnMsgs[gm].role === 'user') { hasUser = true; break; }
-                                }
-                                if (!hasUser) { allRequest = false; break; }
-                            }
-                            
-                            if (allRequest) {
-                                // 收集所有 REQUEST 变体到同一个 user message_node
-                                var requestVariants = [];
-                                var allAssistants = [];
-                                for (var gci = 0; gci < grandChildren.length; gci++) {
-                                    var gcn = mapping[grandChildren[gci]];
-                                    if (!gcn) continue;
-                                    var gcnMsgs = extractMessagesFromDeepSeekNode(gcn, deepseekModelId);
-                                    for (var gm = 0; gm < gcnMsgs.length; gm++) {
-                                        if (gcnMsgs[gm].role === 'user') {
-                                            requestVariants.push(gcnMsgs[gm]);
+                    // 扫描所有分支子节点的所有后代，找到续聊路径
+                    var continuationFound = false;
+                    for (var ci = children.length - 1; ci >= 0 && !continuationFound; ci--) {
+                        var branchChild = mapping[children[ci]];
+                        if (!branchChild) continue;
+                        // 检查该子节点的直接子节点
+                        var gcList = Array.isArray(branchChild.children) ? branchChild.children : [];
+                        for (var gi = gcList.length - 1; gi >= 0 && !continuationFound; gi--) {
+                            var gcNode = mapping[gcList[gi]];
+                            if (!gcNode) continue;
+                            var nextGen = Array.isArray(gcNode.children) ? gcNode.children : [];
+                            if (nextGen.length > 0) {
+                                // 🔀 检测 REQUEST 兄弟节点 = 编辑后的用户消息变体
+                                if (gcList.length > 1) {
+                                    var allRequest = true;
+                                    for (var gci = 0; gci < gcList.length; gci++) {
+                                        var gcnCheck = mapping[gcList[gci]];
+                                        var gcnMsgsCheck = gcnCheck ? extractMessagesFromDeepSeekNode(gcnCheck, deepseekModelId) : [];
+                                        var hasUser = false;
+                                        for (var gm = 0; gm < gcnMsgsCheck.length; gm++) {
+                                            if (gcnMsgsCheck[gm].role === 'user') { hasUser = true; break; }
                                         }
+                                        if (!hasUser) { allRequest = false; break; }
                                     }
-                                    visitedNodeIds.add(grandChildren[gci]);
-                                    traversedCount++;
-                                    
-                                    // 收集该 REQUEST 变体下的所有 assistant 回复
-                                    var gcChildren = Array.isArray(gcn.children) ? gcn.children : [];
-                                    for (var gcci = 0; gcci < gcChildren.length; gcci++) {
-                                        var gcc = mapping[gcChildren[gcci]];
-                                        if (!gcc) continue;
-                                        var gccMsgs = extractMessagesFromDeepSeekNode(gcc, deepseekModelId);
-                                        for (var gccm = 0; gccm < gccMsgs.length; gccm++) {
-                                            if (gccMsgs[gccm].role === 'assistant') {
-                                                allAssistants.push(gccMsgs[gccm]);
+                                    if (allRequest) {
+                                        var requestVariants = [];
+                                        var allAssistants = [];
+                                        for (var gci = 0; gci < gcList.length; gci++) {
+                                            var gcn = mapping[gcList[gci]];
+                                            if (!gcn) continue;
+                                            var gcnMsgs = extractMessagesFromDeepSeekNode(gcn, deepseekModelId);
+                                            for (var gm = 0; gm < gcnMsgs.length; gm++) {
+                                                if (gcnMsgs[gm].role === 'user') requestVariants.push(gcnMsgs[gm]);
+                                            }
+                                            visitedNodeIds.add(gcList[gci]);
+                                            traversedCount++;
+                                            var gcChildren = Array.isArray(gcn.children) ? gcn.children : [];
+                                            for (var gcci = 0; gcci < gcChildren.length; gcci++) {
+                                                var gcc = mapping[gcChildren[gcci]];
+                                                if (!gcc) continue;
+                                                var gccMsgs = extractMessagesFromDeepSeekNode(gcc, deepseekModelId);
+                                                for (var gccm = 0; gccm < gccMsgs.length; gccm++) {
+                                                    if (gccMsgs[gccm].role === 'assistant') allAssistants.push(gccMsgs[gccm]);
+                                                }
+                                                visitedNodeIds.add(gcChildren[gcci]);
+                                                traversedCount++;
                                             }
                                         }
-                                        visitedNodeIds.add(gcChildren[gcci]);
-                                        traversedCount++;
-                                    }
-                                }
-                                
-                                if (requestVariants.length > 0) {
-                                    result.push({
-                                        nodeIndex: nodeIndexCounter++,
-                                        messages: requestVariants,
-                                        selectIndex: 0
-                                    });
-                                }
-                                if (allAssistants.length > 0) {
-                                    result.push({
-                                        nodeIndex: nodeIndexCounter++,
-                                        messages: allAssistants,
-                                        selectIndex: 0
-                                    });
-                                }
-                                
-                                // 扫描所有 REQUEST 变体，找到有后续对话的路径继续遍历
-                                // 优先从最后面的变体（用户最近操作的）找，没有则向前回溯
-                                var continuationFound = false;
-                                for (var gci = grandChildren.length - 1; gci >= 0 && !continuationFound; gci--) {
-                                    var reqChild = mapping[grandChildren[gci]];
-                                    if (!reqChild) continue;
-                                    var reqGrandChildren = Array.isArray(reqChild.children) ? reqChild.children : [];
-                                    for (var rgi = reqGrandChildren.length - 1; rgi >= 0 && !continuationFound; rgi--) {
-                                        var asstChild = mapping[reqGrandChildren[rgi]];
-                                        if (!asstChild) continue;
-                                        var nextGen = Array.isArray(asstChild.children) ? asstChild.children : [];
-                                        if (nextGen.length > 0) {
-                                            for (var ngi = 0; ngi < nextGen.length; ngi++) {
-                                                walkNode(nextGen[ngi], branchId);
-                                            }
-                                            continuationFound = true;
+                                        if (requestVariants.length > 0) {
+                                            result.push({ nodeIndex: nodeIndexCounter++, messages: requestVariants, selectIndex: 0 });
+                                        }
+                                        if (allAssistants.length > 0) {
+                                            result.push({ nodeIndex: nodeIndexCounter++, messages: allAssistants, selectIndex: 0 });
                                         }
                                     }
                                 }
-                            } else {
-                                for (var gi = 0; gi < grandChildren.length; gi++) {
-                                    walkNode(grandChildren[gi], branchId);
+                                // 继续遍历后续节点
+                                for (var ngi = 0; ngi < nextGen.length; ngi++) {
+                                    walkNode(nextGen[ngi], branchId);
                                 }
-                            }
-                        } else {
-                            for (var gi = 0; gi < grandChildren.length; gi++) {
-                                walkNode(grandChildren[gi], branchId);
+                                continuationFound = true;
                             }
                         }
                     }
