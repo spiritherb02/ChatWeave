@@ -3589,7 +3589,7 @@
                 <p style="margin-top: 16px;"><strong>YourAIScroll / ChatWeave JSON + Markdown 粘贴 → RikkaHub</strong></p>
                 <ol style="margin-left: 20px; line-height: 1.8;">
                     <li>JSON：直接上传 YourAIScroll 或 ChatWeave 导出的 JSON 文件。</li>
-                    <li>Markdown：点"粘贴 Markdown 文本"，每次粘贴一个对话；建议保留 <code>[USER]</code> / <code>[ASSISTANT]</code> 标记。</li>
+                    <li>Markdown：点"粘贴 Markdown 文本"，每次粘贴一个会话；建议保留 <code>[USER]</code> / <code>[ASSISTANT]</code> 标记。</li>
                     <li>进入工作台后可继续追贴更多对话，再统一合并。</li>
                 </ol>
 
@@ -3672,7 +3672,7 @@
                 </div>
                 <div class="workspace-toolbar">
                     <input type="text" id="workspaceSearchInput" class="workspace-search"
-                        placeholder="搜索对话标题、来源或关键词..." oninput="renderWorkspaceList()">
+                        placeholder="搜索会话标题、来源或关键词..." oninput="renderWorkspaceList()">
                     <button class="btn-text" id="workspaceSelectAllBtn" onclick="setWorkspaceSelectionState(true)">全选</button>
                     <button class="btn-text" id="workspaceSelectNoneBtn" onclick="setWorkspaceSelectionState(false)">全不选</button>
                     <button class="btn-text" id="workspaceInvertSelectBtn" onclick="invertWorkspaceSelection()">反选</button>
@@ -3761,7 +3761,7 @@
             </div>
             <div class="modal-body">
                 <p id="pasteModalHint" style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px;">
-                    请粘贴 YourAIScroll 或 ChatWeave Exporter 复制的 Markdown 内容（每次一个对话，确认后会追加到对话工作台）。建议优先使用本扩展下载 JSON 导入，结构和时间戳保留更完整、导入更稳；Markdown 更适合临时补录。
+                    请粘贴 YourAIScroll 或 ChatWeave Exporter 复制的 Markdown 内容（每次一个会话，确认后会追加到对话工作台）。建议优先使用本扩展下载 JSON 导入，结构和时间戳保留更完整、导入更稳；Markdown 更适合临时补录。
                 </p>
                 <textarea id="pasteTextArea" class="paste-textarea" placeholder="在此粘贴内容..."></textarea>
                 <div style="display: flex; gap: var(--md-sys-spacing-md); margin-top: var(--md-sys-spacing-lg); justify-content: flex-end;">
@@ -3788,8 +3788,8 @@
                             <h4 class="preview-section-title">基本信息</h4>
                             <div class="preview-form">
                                 <div class="form-group">
-                                    <label class="form-label">对话标题</label>
-                                    <input type="text" id="previewTitleInput" class="form-input" placeholder="输入对话标题">
+                                    <label class="form-label">会话标题</label>
+                                    <input type="text" id="previewTitleInput" class="form-input" placeholder="输入会话标题">
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -4517,19 +4517,19 @@
                 'source.upload.deepseekOld.title': '（可选）上传 DeepSeek 旧版数据',
                 'source.upload.deepseekOld': '点击或拖拽上传 DeepSeek 旧版 ZIP（如果你有）',
                 'source.upload.paste': '📝 粘贴 Markdown 文本',
-                'source.status.loadedPrimary': '当前来源已加载 {count} 个对话',
-                'source.status.loadedDeepseekOld': '已加载旧版 {count} 个对话',
+                'source.status.loadedPrimary': '当前来源已加载 {count} 个会话',
+                'source.status.loadedDeepseekOld': '已加载旧版 {count} 个会话',
                 'workspace.title': '对话工作台',
-                'workspace.entryLabel': '已导入 {count} 个对话，可点击预览消息内容',
+                'workspace.entryLabel': '已导入 {count} 个会话，可点击预览消息内容',
                 'workspace.date.today': '今天',
                 'workspace.date.yesterday': '昨天',
                 'workspace.meta': '已选 {selected} / {total}',
-                'workspace.searchPlaceholder': '搜索对话标题、来源或关键词...',
+                'workspace.searchPlaceholder': '搜索会话标题、来源或关键词...',
                 'workspace.selectAll': '全选',
                 'workspace.selectNone': '全不选',
                 'workspace.invert': '反选',
                 'workspace.deleteSelected': '🗑 删除选中',
-                'workspace.deleteConfirm': '确定要删除选中的 {count} 个对话吗？此操作不可撤销。',
+                'workspace.deleteConfirm': '确定要删除选中的 {count} 个会话吗？此操作不可撤销。',
                 'workspace.fullscreen.enter': '放大编辑',
                 'workspace.fullscreen.exit': '退出全屏',
                 'workspace.fullscreen.title.enter': '放大工作台，方便小屏编辑',
@@ -4560,7 +4560,7 @@
                 'merge.button.needBackup': '合并聊天记录（需先选择 RikkaHub 备份）',
                 'merge.button.processing': '合并中...',
                 'merge.button.title.needSource': '请先上传源数据文件',
-                'merge.button.title.needSelection': '请先在对话工作台中勾选至少一个对话',
+                'merge.button.title.needSelection': '请先在对话工作台中勾选至少一个会话',
                 'merge.button.title.needBackup': '点击后选择 RikkaHub 原始备份 ZIP',
                 'theme.dark.toLight': '☀️ 切换到浅色模式',
                 'theme.dark.toDark': '🌙 切换到深色模式',
@@ -4607,13 +4607,13 @@
                 'error.deepseekOldReadFailedWithMsg': '读取 DeepSeek 旧版文件失败: {message}',
                 'error.deepseekOldInvalidZip': '文件不是有效的 ZIP 文件或文件已损坏。',
                 'error.deepseekOldInvalidJson': '文件中的 JSON 格式错误。',
-                'info.deepseekOldLoaded': '已加载 DeepSeek 旧版数据，包含 {count} 个对话（从 {msgCount} 条消息）',
+                'info.deepseekOldLoaded': '已加载 DeepSeek 旧版数据，包含 {count} 个会话（从 {msgCount} 条消息）',
                 'error.rikkaMustZip': 'RikkaHub 文件必须是 .zip 格式',
                 'error.rikkaTooSmall': 'RikkaHub 文件大小异常，可能不是有效备份',
                 'error.rikkaInvalidZipPrefix': 'RikkaHub 文件不是有效的 ZIP 文件。文件前4字节: {prefix}',
                 'error.rikkaDbMissing': 'RikkaHub 压缩包中未找到 rikka_hub.db 文件。ZIP 文件中包含: {files}',
-                'info.rikkaDbLoadedWal': '已加载 RikkaHub 数据库（从 WAL 重建 {frameCount} 帧），包含 {count} 个对话',
-                'info.rikkaDbLoaded': '已加载 RikkaHub 数据库，包含 {count} 个对话',
+                'info.rikkaDbLoadedWal': '已加载 RikkaHub 数据库（从 WAL 重建 {frameCount} 帧），包含 {count} 个会话',
+                'info.rikkaDbLoaded': '已加载 RikkaHub 数据库，包含 {count} 个会话',
                 'info.rikkaPartFormatDetected': '已识别目标备份：数据库版本 {version}，消息类型格式 {format}',
                 'label.partFormat.legacy': '旧版（完整类名）',
                 'label.partFormat.v2': '新版（v2/2.0 短类型名）',
@@ -4626,7 +4626,7 @@
                 'error.rikkaReadFailed': '读取 RikkaHub 文件失败: {message}<br>提示：请上传从 RikkaHub 导出的 .zip 备份文件',
                 'error.rikkaReadGeneral': '读取 RikkaHub 文件时发生错误',
                 'error.mergeNeedSource': '请先上传源数据文件',
-                'error.mergeNeedSelection': '请先在对话工作台中勾选至少一个对话',
+                'error.mergeNeedSelection': '请先在对话工作台中勾选至少一个会话',
                 'info.mergeNeedRikka': '请先选择 RikkaHub 原始备份 ZIP；选完会自动继续合并。',
                 'info.mergeInit': '正在准备合并流程...',
                 'info.mergeInitDb': '正在读取目标备份...',
@@ -4648,9 +4648,9 @@
                 'success.mergeKeepBoth': '<br>保留 {count} 个 ID 冲突为副本',
                 'success.mergeEmptySkip': '<br>跳过 {count} 个空会话',
                 'success.mergeWarning': '<br>共 {count} 条注意项，详见下方面板',
-                'success.titleHint.default': '对话标题保持导入来源的默认策略。',
-                'success.titleHint.chatgpt': 'ChatGPT 对话标题会自动添加 [ChatGPT] 前缀，方便识别。',
-                'success.titleHint.deepseek': 'DeepSeek 新版对话标题会自动添加 [DeepSeek] 前缀，旧版对话保留原标题。',
+                'success.titleHint.default': '会话标题保持导入来源的默认策略。',
+                'success.titleHint.chatgpt': 'ChatGPT 会话标题会自动添加 [ChatGPT] 前缀，方便识别。',
+                'success.titleHint.deepseek': 'DeepSeek 新版会话标题会自动添加 [DeepSeek] 前缀，旧版对话保留原标题。',
                 'success.titleHint.youraiscroll': '导出 JSON 对话会尽量保留原标题。',
                 'success.titleHint.qwen': 'Qwen 官方导出 JSON 会尽量保留原标题与时间。',
                 'success.titleHint.multi': '多来源合并完成：{summary}。',
@@ -4663,9 +4663,9 @@
                 'report.sourceDiffLine': '{source}：新增 {added}，跳过 {skipped}，警告 {warnings}',
                 'report.warning.imageMissing': 'ChatGPT 有 {count} 个图片引用未在导出包中找到：已保留文本消息并跳过缺失图片。',
                 'report.warning.unknownBlocks': '检测到 {count} 个无法识别块标记：将按普通文本保留。',
-                'report.warning.emptyConversations': '有 {count} 个对话在转换后无有效消息：已自动跳过。',
+                'report.warning.emptyConversations': '有 {count} 个会话在转换后无有效消息：已自动跳过。',
                 'report.warning.duplicatesSkipped': '检测到 {count} 个重复对话 ID：按策略“跳过已存在对话”。',
-                'report.warning.keepBoth': '检测到 {count} 个对话 ID 冲突：已按策略“保留并另存”。',
+                'report.warning.keepBoth': '检测到 {count} 个会话 ID 冲突：已按策略“保留并另存”。',
                 'report.warning.none': '未发现结构风险。',
                 'fallback.youraiscrollConversationTitle': '导出对话',
                 'fallback.qwenConversationTitle': 'Qwen 对话',
@@ -5025,7 +5025,7 @@
                 <p style="margin-top: 16px;"><strong>YourAIScroll / ChatWeave JSON + Markdown → RikkaHub</strong></p>
                 <ol style="margin-left: 20px; line-height: 1.8;">
                     <li>JSON：直接上传导出的 JSON 文件。</li>
-                    <li>Markdown：点"粘贴 Markdown 文本"，每次一个对话，建议保留 <code>[USER]</code> / <code>[ASSISTANT]</code> 标记。</li>
+                    <li>Markdown：点"粘贴 Markdown 文本"，每次一个会话，建议保留 <code>[USER]</code> / <code>[ASSISTANT]</code> 标记。</li>
                     <li>进入工作台后可继续追加，再统一合并。</li>
                 </ol>
 
@@ -6064,7 +6064,7 @@
                 if (entryBar) entryBar.style.display = 'none';
                 return;
             }
-            // 显示入口条：已导入 N 个对话
+            // 显示入口条：已导入 N 个会话
             if (entryBar) entryBar.style.display = '';
             if (entryLabel) entryLabel.textContent = t('workspace.entryLabel').replace('{count}', conversations.length);
 
@@ -6140,7 +6140,7 @@
             workspaceStore.conversations = conversations.filter(c => c.selected === false);
             workspaceStore.updatedAt = Date.now();
             renderWorkspaceList();
-            showToast('提示', '已删除 ' + selected.length + ' 个对话', 'success', 3000);
+            showToast('提示', '已删除 ' + selected.length + ' 个会话', 'success', 3000);
         }
 
         // ===== 打开编辑器 =====
@@ -6543,7 +6543,7 @@
             const { workspaceId, originalItem } = editorState;
             if (!workspaceId || !originalItem) return;
 
-            showConfirmBar('确定要删除这个对话吗？此操作可在保存前撤销。').then(confirmed => {
+            showConfirmBar('确定要删除这个会话吗？此操作可在保存前撤销。').then(confirmed => {
                 if (confirmed) {
                     const idx = (workspaceStore.conversations || []).findIndex(c => c.id === workspaceId);
                     if (idx >= 0) {
@@ -9269,7 +9269,7 @@
                         title.textContent = t('source.upload.paste');
                         hint.textContent = currentLanguage === 'en-US'
                             ? 'Paste Markdown copied from YourAIScroll or ChatWeave Exporter (one conversation each time; it will be appended to workspace after confirmation). Recommended: use this extension to download JSON when possible, because structure and timestamps are preserved more completely and imports are more stable. Markdown is better used as a fallback or quick add.'
-                            : '请粘贴 YourAIScroll 或 ChatWeave Exporter 复制的 Markdown 内容（每次一个对话，确认后会追加到对话工作台）。更推荐使用本扩展下载 JSON 再导入，因为结构与时间戳保留更完整、导入更稳；Markdown 更适合兜底补录或快速追加。';
+                            : '请粘贴 YourAIScroll 或 ChatWeave Exporter 复制的 Markdown 内容（每次一个会话，确认后会追加到对话工作台）。更推荐使用本扩展下载 JSON 再导入，因为结构与时间戳保留更完整、导入更稳；Markdown 更适合兜底补录或快速追加。';
             
                         // 显示对话框
                         modal.classList.add('active');
@@ -9333,7 +9333,7 @@
                             uploadBox.classList.remove('loading', 'has-wave');
                             fileInfo.textContent = currentLanguage === 'en-US'
                                 ? `Content pasted (total ${sourceData.length} conversations)`
-                                : `已粘贴内容（累计 ${sourceData.length} 个对话）`;
+                                : `已粘贴内容（累计 ${sourceData.length} 个会话）`;
 
                             const platform = result.platform || extractPlatformFromUrl(result.url) || 'Unknown';
                             const msgCount = result.messages ? result.messages.length : 0;
@@ -11378,7 +11378,7 @@
 
             if (messages.length === 0) return conversations;
 
-            // 简单策略：将所有消息作为一个对话
+            // 简单策略：将所有消息作为一个会话
             // 更复杂的策略可以根据时间间隔或用户输入来分组
             const conversationId = generateUUID();
             const title = '[DeepSeek Old] ' + (fileName.replace('.csv', '') || 'Imported');
