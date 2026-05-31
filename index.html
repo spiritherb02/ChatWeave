@@ -392,6 +392,41 @@
             height: 200%;
         }
 
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            border-radius: var(--md-sys-shape-corner-small);
+            font-family: var(--md-sys-font-family);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: none;
+            transform: none;
+            box-shadow: none;
+        }
+
         /* 自定义下拉框 */
         .select-wrapper {
             position: relative;
@@ -2235,6 +2270,47 @@
             50%       { opacity: 1; }
         }
 
+        /* 底部确认条 */
+        .confirm-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            padding: 14px 20px;
+            background: var(--md-sys-color-surface-container-high);
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 1100;
+            animation: sheetSlideUp 0.25s ease;
+        }
+        .confirm-bar.active { display: flex; }
+        .confirm-bar-text {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface);
+            flex: 1;
+        }
+        .confirm-bar-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .confirm-bar button {
+            padding: 8px 16px;
+            border-radius: var(--md-sys-shape-corner-small);
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+        }
+        .confirm-bar-cancel {
+            background: transparent;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        .confirm-bar-confirm {
+            background: var(--md-sys-color-error);
+            color: #fff;
+        }
+
         .modal-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -2399,475 +2475,83 @@
             }
         }
 
-        /* 会话工作台 */
-        .workspace-card {
-            background: var(--md-sys-color-surface-container-high);
+        /* 对话工作台 — 卡片网格 */
+        .workspace-modal {
+            max-width: 820px;
         }
-
-        .workspace-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
+        .workspace-modal-body {
+            padding: 20px 24px 24px;
         }
-
-        .workspace-header h3 {
-            margin: 0;
-            font-size: 16px;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .workspace-meta {
-            font-size: 12px;
-            color: var(--md-sys-color-on-surface-variant);
-            white-space: nowrap;
-        }
-
-        .workspace-toolbar {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        body.workspace-fullscreen-open {
-            overflow: hidden;
-        }
-
-        .workspace-search {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 12px;
-            border: 1px solid var(--md-sys-color-outline-variant);
-            border-radius: var(--md-sys-shape-corner-medium);
-            background: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            font-family: var(--md-sys-font-family);
-            font-size: 14px;
-        }
-
-        .workspace-search:focus {
-            outline: none;
-            border-color: var(--md-sys-color-primary);
-        }
-
-        .workspace-list {
-            max-height: 340px;
-            overflow-y: auto;
-            border: 1px solid var(--md-sys-color-outline-variant);
-            border-radius: var(--md-sys-shape-corner-medium);
-            background: var(--md-sys-color-surface);
-        }
-
-        .workspace-row-actions {
-            display: flex;
-            gap: 6px;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-        }
-
-        .workspace-card.workspace-fullscreen {
-            position: fixed;
-            z-index: 980;
-            top: calc(env(safe-area-inset-top, 0px) + 8px);
-            right: calc(env(safe-area-inset-right, 0px) + 8px);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-            left: calc(env(safe-area-inset-left, 0px) + 8px);
-            margin: 0;
-            border-radius: 14px;
-            box-shadow: 0 20px 48px color-mix(in srgb, var(--md-sys-color-shadow) 48%, transparent);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            padding-top: 2px;
-            padding-bottom: 2px;
-            background: var(--md-sys-color-surface-container-high);
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-list {
-            flex: 1;
-            min-height: 0;
-            max-height: none;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-search {
-            min-width: 140px;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-row {
-            grid-template-columns: auto 1fr;
-            grid-template-areas:
-                "check main"
-                "badge badge"
-                "actions actions";
-            row-gap: 8px;
-            align-items: start;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-row > .workspace-checkbox {
-            grid-area: check;
-            margin-top: 2px;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-row > .workspace-row-main {
-            grid-area: main;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-row > .workspace-badge {
-            grid-area: badge;
-            justify-self: start;
-            max-width: 100%;
-        }
-
-        .workspace-card.workspace-fullscreen .workspace-row > .workspace-row-actions {
-            grid-area: actions;
-            justify-content: flex-start;
-        }
-
-        @media (max-width: 680px) {
-            .workspace-card.workspace-fullscreen {
-                top: calc(env(safe-area-inset-top, 0px) + 4px);
-                right: calc(env(safe-area-inset-right, 0px) + 4px);
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
-                left: calc(env(safe-area-inset-left, 0px) + 4px);
-                border-radius: 12px;
-            }
-
-            .workspace-card.workspace-fullscreen .workspace-toolbar {
-                gap: 6px;
-            }
-
-            .workspace-card.workspace-fullscreen .workspace-search {
-                min-width: 100%;
-            }
-        }
-
-        .workspace-row {
-            display: grid;
-            grid-template-columns: auto 1fr auto auto;
-            gap: 10px;
-            align-items: center;
-            padding: 10px 12px;
-            border-bottom: none;
-        }
-
-        .workspace-item {
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .workspace-item:last-child {
-            border-bottom: none;
-        }
-
-        .workspace-row:last-child {
-            border-bottom: none;
-        }
-
-        .workspace-row:hover {
-            background: var(--md-sys-color-surface-container-high);
-        }
-
-        .workspace-row-main {
-            min-width: 0;
-        }
-
-        .workspace-row-title {
-            font-size: 14px;
-            color: var(--md-sys-color-on-surface);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .workspace-row-sub {
-            font-size: 12px;
-            color: var(--md-sys-color-on-surface-variant);
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .workspace-badge {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 999px;
+        .workspace-entry-bar {
             background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            white-space: nowrap;
+            border: 1px solid var(--md-sys-color-primary);
+            animation: modalSlideIn 0.3s ease;
         }
-
-        .workspace-action-btn {
-            padding: 6px 10px;
+        .workspace-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+        .workspace-meta {
+            font-size: 13px; color: var(--md-sys-color-on-surface-variant);
+        }
+        .workspace-toolbar {
+            display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .workspace-search {
+            flex: 1; min-width: 160px; padding: 8px 12px;
             border: 1px solid var(--md-sys-color-outline-variant);
             border-radius: var(--md-sys-shape-corner-small);
             background: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
+            color: var(--md-sys-color-on-surface); font-size: 13px;
+        }
+        .workspace-search:focus {
+            outline: none; border-color: var(--md-sys-color-primary);
         }
 
-        .workspace-action-btn:hover {
-            border-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-primary);
-            background: var(--md-sys-color-primary-container);
-        }
-
-        .workspace-empty {
-            padding: 24px 12px;
-            text-align: center;
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 13px;
-        }
-
-        .workspace-preview-overlay {
-            z-index: 1080;
-        }
-
-        .workspace-preview-modal {
-            max-width: 960px;
-            width: 96%;
-            max-height: 92vh;
-        }
-
-        .workspace-preview-modal .modal-body {
-            padding: 16px 18px 20px;
-        }
-
-        .workspace-preview-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .workspace-preview-title {
-            font-size: 12px;
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .workspace-preview-chat {
-            max-height: min(68vh, 720px);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border: 1px solid var(--md-sys-color-outline-variant);
-            border-radius: var(--md-sys-shape-corner-medium);
-            padding: 12px;
-            background: var(--md-sys-color-surface-container-high);
-        }
-
-        .workspace-preview-message {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .workspace-preview-message.user {
-            justify-content: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .workspace-preview-message.assistant,
-        .workspace-preview-message.system,
-        .workspace-preview-message.tool {
-            justify-content: flex-start;
-        }
-
-        .workspace-preview-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 999px;
-            border: 1px solid var(--md-sys-color-outline-variant);
-            background: var(--md-sys-color-surface-container);
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 11px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            user-select: none;
-        }
-
-        .workspace-preview-message.user .workspace-preview-avatar {
-            border-color: color-mix(in srgb, var(--md-sys-color-primary) 28%, var(--md-sys-color-outline-variant));
-            background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-        }
-
-        .workspace-preview-message.system .workspace-preview-avatar {
-            border-color: color-mix(in srgb, #8e62d9 32%, var(--md-sys-color-outline-variant));
-            background: color-mix(in srgb, #8e62d9 18%, var(--md-sys-color-surface));
-            color: #8e62d9;
-        }
-
-        .workspace-preview-message.tool .workspace-preview-avatar {
-            border-color: color-mix(in srgb, #1c9cb4 32%, var(--md-sys-color-outline-variant));
-            background: color-mix(in srgb, #1c9cb4 14%, var(--md-sys-color-surface));
-            color: #1c9cb4;
-        }
-
-        .workspace-preview-content {
-            min-width: 0;
-            width: min(82%, 660px);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .workspace-preview-message.user .workspace-preview-content {
-            align-items: flex-end;
-        }
-
-        .workspace-preview-head {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-height: 18px;
-        }
-
-        .workspace-preview-message.user .workspace-preview-head {
-            justify-content: flex-end;
-        }
-
-        .workspace-preview-role {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .workspace-preview-time {
-            font-size: 10px;
-            color: var(--md-sys-color-on-surface-variant);
-            opacity: 0.86;
-            white-space: nowrap;
-        }
-
-        .workspace-preview-bubble {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid var(--md-sys-color-outline-variant);
-            font-size: 12px;
-            line-height: 1.5;
-            background: var(--md-sys-color-surface);
-            overflow: visible;
-        }
-
-        .workspace-preview-message.user .workspace-preview-bubble {
-            background: color-mix(in srgb, var(--md-sys-color-primary-container) 40%, var(--md-sys-color-surface));
-            border-color: color-mix(in srgb, var(--md-sys-color-primary) 24%, var(--md-sys-color-outline-variant));
-        }
-
-        .workspace-preview-message.system .workspace-preview-bubble {
-            border-style: dashed;
-            background: color-mix(in srgb, #8e62d9 6%, var(--md-sys-color-surface));
-        }
-
-        .workspace-preview-message.tool .workspace-preview-bubble {
-            border-style: dashed;
-            background: color-mix(in srgb, #1c9cb4 8%, var(--md-sys-color-surface));
-        }
-
-        .workspace-preview-rich {
-            color: var(--md-sys-color-on-surface);
-            word-break: break-word;
-            overflow-wrap: anywhere;
-            line-height: 1.55;
-            font-size: 13px;
-            max-height: none;
-            overflow: visible;
-        }
-
-        .workspace-preview-empty {
-            padding: 26px 12px;
-            text-align: center;
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 13px;
-        }
-
-        .merge-options-card {
-            background: var(--md-sys-color-surface-container-high);
-        }
-
-        .merge-options-row {
+        .workspace-grid {
             display: grid;
-            grid-template-columns: 120px 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 12px;
-            align-items: center;
+            max-height: 600px; overflow-y: auto; padding: 2px;
+        }
+        @media (max-width: 500px) {
+            .workspace-grid { grid-template-columns: 1fr; }
         }
 
-        .merge-options-label {
-            font-size: 13px;
-            color: var(--md-sys-color-on-surface);
-            font-weight: 600;
-        }
-
-        .merge-options-hint {
-            margin-top: 8px;
-            font-size: 12px;
-            color: var(--md-sys-color-on-surface-variant);
-            line-height: 1.5;
-        }
-
+        /* 备份选择卡片 */
         .target-backup-card {
             background: var(--md-sys-color-surface-container-high);
         }
-
         .target-backup-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; margin-bottom: 8px;
         }
-
         .target-backup-head h3 {
-            margin: 0;
-            font-size: 16px;
-            color: var(--md-sys-color-on-surface);
+            margin: 0; font-size: 16px; color: var(--md-sys-color-on-surface);
         }
-
-        .merge-option-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        .merge-options-label {
+            font-size: 13px; font-weight: 600; color: var(--md-sys-color-on-surface);
+            margin-bottom: 6px;
         }
-
+        .merge-options-row {
+            display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center;
+        }
+        @media (max-width: 600px) {
+            .merge-options-row { grid-template-columns: 1fr; gap: 8px; }
+        }
+        .merge-option-tags { display: flex; flex-wrap: wrap; gap: 8px; }
         .merge-option-tag {
             border: 1px solid var(--md-sys-color-outline);
             background: var(--md-sys-color-surface);
             color: var(--md-sys-color-on-surface);
             border-radius: var(--md-sys-shape-corner-full);
-            padding: 8px 12px;
-            font-family: var(--md-sys-font-family);
-            font-size: 13px;
-            line-height: 1.3;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            padding: 8px 12px; font-size: 13px; cursor: pointer;
+            transition: all 0.2s;
         }
-
         .merge-option-tag:hover {
             border-color: var(--md-sys-color-primary);
             background: var(--md-sys-color-surface-container-high);
         }
-
         .merge-option-tag.selected {
             border-color: var(--md-sys-color-primary-container);
             background: var(--md-sys-color-primary-container);
@@ -2875,68 +2559,425 @@
             font-weight: 600;
         }
 
-        .workspace-edit-modal {
-            max-width: 560px;
-            width: 92%;
+        .merge-options-card {
+            background: var(--md-sys-color-surface-container-high);
+        }
+        .merge-options-hint {
+            margin-top: 8px; font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant); line-height: 1.5;
         }
 
+        .ws-card {
+            position: relative;
+            background: var(--md-sys-color-surface);
+            border: 2px solid var(--md-sys-color-outline-variant);
+            border-radius: 14px; padding: 14px;
+            cursor: pointer;
+            transition: border-color .2s, box-shadow .2s, transform .15s;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .ws-card:hover {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 4px 16px rgba(0,0,0,.1);
+            transform: translateY(-2px);
+        }
+        .ws-card.selected { border-color: var(--md-sys-color-primary); background: var(--md-sys-color-primary-container); }
+        .ws-card-header {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;
+        }
+        .ws-card-check {
+            width: 20px; height: 20px; accent-color: var(--md-sys-color-primary);
+            flex-shrink: 0; cursor: pointer; margin-top: 2px;
+        }
+        .ws-card-title {
+            font-size: 14px; font-weight: 600; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; color: var(--md-sys-color-on-surface); flex: 1;
+        }
+        .ws-card-meta {
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+        }
+        .ws-card-badge {
+            font-size: 11px; padding: 2px 8px; border-radius: 9999px;
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        .ws-date-header {
+            font-size: 12px; font-weight: 600; color: var(--md-sys-color-primary);
+            padding: 10px 4px 4px; grid-column: 1 / -1;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            margin-bottom: 4px;
+        }
+        .workspace-empty {
+            padding: 32px 16px; text-align: center;
+            color: var(--md-sys-color-on-surface-variant); font-size: 14px;
+        }
+
+        /* 工作台编辑器（全屏滑入页） */
+        .editor-page {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--md-sys-color-surface);
+            z-index: 1050; display: none; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform .3s cubic-bezier(.22,.61,.36,1);
+        }
+        .editor-page.active {
+            display: flex; transform: translateX(0);
+        }
         @media (max-width: 600px) {
-            .merge-options-row {
-                grid-template-columns: 1fr;
-                gap: 8px;
+            .editor-page {
+                transform: translateY(100%);
+                border-radius: 20px 20px 0 0; top: 10%;
             }
-
-            .workspace-preview-overlay {
-                padding: 0;
-                align-items: stretch;
-            }
-
-            .workspace-preview-modal {
-                width: 100%;
-                max-width: none;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-
-            .workspace-preview-modal .modal-header {
-                padding: 14px 16px;
-            }
-
-            .workspace-preview-modal .modal-title {
-                font-size: 16px;
-            }
-
-            .workspace-preview-modal .modal-body {
-                padding: 10px 12px 14px;
-            }
-
-            .workspace-preview-chat {
-                max-height: calc(100vh - 180px);
-                padding: 10px;
-                gap: 8px;
-            }
-
-            .workspace-preview-message {
-                gap: 8px;
-            }
-
-            .workspace-preview-avatar {
-                width: 24px;
-                height: 24px;
-                font-size: 10px;
-            }
-
-            .workspace-preview-content {
-                width: min(93%, 620px);
-            }
-
-            .workspace-preview-bubble {
-                font-size: 12px;
-                padding: 9px 10px;
-            }
+            .editor-page.active { transform: translateY(0); }
+        }
+        .editor-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            flex-shrink: 0;
+        }
+        .editor-back-btn {
+            display: flex; align-items: center; gap: 4px;
+            background: none; border: none; font-size: 14px;
+            color: var(--md-sys-color-primary); cursor: pointer; padding: 4px 8px;
+            border-radius: 8px;
+        }
+        .editor-back-btn:hover { background: var(--md-sys-color-surface-container-high); }
+        .editor-title {
+            font-size: 14px; font-weight: 600; color: var(--md-sys-color-on-surface);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            flex: 1; text-align: center; margin: 0 8px;
+        }
+        .editor-top-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .editor-meta {
+            padding: 10px 16px; font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            flex-shrink: 0;
+        }
+        .editor-messages {
+            flex: 1; overflow-y: auto; padding: 16px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .editor-empty {
+            text-align: center; color: var(--md-sys-color-on-surface-variant);
+            padding: 40px 16px; font-size: 14px;
+        }
+        .editor-bottombar {
+            display: flex; gap: 10px; padding: 12px 16px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            justify-content: space-between; flex-shrink: 0;
         }
 
+        /* 编辑器消息气泡 */
+        .emsg {
+            display: flex; gap: 10px; align-items: flex-start;
+            max-width: 85%; animation: emsgIn .25s ease;
+        }
+        @keyframes emsgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .emsg.user { align-self: flex-end; flex-direction: row-reverse; }
+        .emsg.assistant { align-self: flex-start; }
+        .emsg.system, .emsg.tool { align-self: center; opacity: .75; }
+        .emsg-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; flex-shrink: 0;
+        }
+        .emsg.user .emsg-avatar { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+        .emsg.assistant .emsg-avatar { background: var(--md-sys-color-tertiary); color: var(--md-sys-color-on-tertiary); }
+        .emsg.system .emsg-avatar, .emsg.tool .emsg-avatar { background: var(--md-sys-color-outline-variant); }
+        .emsg-body {
+            background: var(--md-sys-color-surface-container-high);
+            border-radius: 16px; padding: 10px 14px; min-width: 80px;
+            position: relative;
+        }
+        .emsg.user .emsg-body {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        .emsg-content {
+            font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+        }
+        .emsg-time {
+            font-size: 10px; color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px; opacity: .6;
+        }
+        .emsg-actions {
+            display: none; position: absolute; top: -10px; right: 4px;
+            gap: 2px;
+        }
+        .emsg-body:hover .emsg-actions { display: flex; }
+
+        /* 触屏设备：始终显示编辑/删除按钮 */
+        @media (hover: none) {
+            .emsg-actions { display: flex; }
+        }
+        .emsg-act {
+            padding: 2px 8px; font-size: 11px; border: none;
+            border-radius: 6px; cursor: pointer;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface-variant);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .emsg-act:hover { background: var(--md-sys-color-surface-container-high); }
+        .emsg-act.danger { color: var(--md-sys-color-error); }
+
+        /* 变体节点容器 */
+        .emsg-node {
+            display: flex; flex-direction: column; align-items: stretch;
+            margin-bottom: 8px;
+        }
+        .emsg-node.has-variants {
+            background: var(--md-sys-color-surface-container-high);
+            border-radius: 12px; padding: 4px 0;
+        }
+        /* 变体切换栏 */
+        .emsg-variant-bar {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 2px 12px 4px;
+        }
+        .emsg-variant-btn {
+            background: var(--md-sys-color-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-primary);
+            border-radius: 6px; padding: 2px 10px;
+            font-size: 12px; cursor: pointer;
+            transition: background .15s;
+        }
+        .emsg-variant-btn:hover {
+            background: var(--md-sys-color-primary-container);
+        }
+        .emsg-variant-label {
+            font-size: 11px; color: var(--md-sys-color-on-surface-variant);
+            min-width: 40px; text-align: center;
+            font-weight: 500;
+        }
+
+        /* 编辑器 Part 卡片 — 仿 RikkaHub ChainOfThought */
+        .epart {
+            position: relative; margin: 0 0 0 16px; padding: 8px 12px;
+            border-radius: 12px; font-size: 13px; line-height: 1.6;
+        }
+        /* 左侧时间线 */
+        .epart::before {
+            content: ''; position: absolute; left: -12px; top: 12px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--md-sys-color-primary);
+        }
+        .epart-reasoning {
+            background: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        .epart-reasoning::before {
+            background: var(--md-sys-color-tertiary);
+        }
+        .epart-tool {
+            background: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface);
+        }
+        .epart-tool::before {
+            background: var(--md-sys-color-outline);
+        }
+        .epart-text {
+            margin: 0; padding: 10px 14px;
+            background: var(--md-sys-color-surface-container-high);
+            border-radius: 16px;
+            color: var(--md-sys-color-on-surface);
+            font-size: 13px; line-height: 1.6;
+            white-space: pre-wrap; word-break: break-word;
+        }
+        .epart-text::before { display: none; }
+        .epart-head {
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 0 4px; font-size: 12px; font-weight: 600;
+        }
+        .epart-icon { font-size: 15px; flex-shrink: 0; }
+        .epart-label { flex-shrink: 0; }
+        .epart-preview {
+            font-size: 11px; opacity: 0.7;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            flex: 1; min-width: 0;
+        }
+        .epart-toggle {
+            margin-left: auto; flex-shrink: 0;
+            background: none; border: none;
+            color: var(--md-sys-color-primary); font-size: 11px; cursor: pointer;
+            padding: 2px 8px; border-radius: 4px;
+        }
+        .epart-toggle:hover { background: var(--md-sys-color-surface-container-high); }
+        .epart-body {
+            padding: 8px 12px 10px;
+            font-size: 12px; line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+            color: var(--md-sys-color-on-tertiary-container);
+            max-height: 300px; overflow-y: auto;
+            margin-top: 4px;
+        }
+        /* ChainOfThought 折叠容器（仿 RikkaHub ThinkingBlock） */
+        .epart-cot {
+            background: var(--md-sys-color-surface-container);
+            border-radius: 16px; overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .epart-cot-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; cursor: pointer;
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+            transition: background .15s;
+        }
+        .epart-cot-head:hover { background: var(--md-sys-color-surface-container-high); }
+        .epart-cot-count {
+            font-size: 11px; opacity: .6;
+        }
+        .epart-cot-toggle {
+            margin-left: auto; flex-shrink: 0;
+            color: var(--md-sys-color-primary); font-weight: 500;
+        }
+        .epart-cot-body {
+            padding: 0 8px 8px;
+        }
+        .epart-cot-body .epart {
+            margin: 4px 0 4px 12px; padding: 6px 10px;
+            border-radius: 10px; font-size: 12px;
+        }
+        .epart-cot-body .epart::before {
+            left: -9px; top: 10px; width: 6px; height: 6px;
+        }
+        .epart-cot-body .epart-head {
+            padding: 4px 8px; font-size: 11px; cursor: pointer;
+            border-radius: 6px; transition: background .15s;
+        }
+        .epart-cot-body .epart-head:hover { background: var(--md-sys-color-surface-container); }
+        .epart-cot-body .epart-body {
+            font-size: 11px; max-height: 200px; padding: 6px 0 4px;
+            margin-top: 2px; border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .epart-cot-body .epart-tool-query { font-size: 11px; padding: 2px 0px 2px; }
+        .epart-cot-body .epart-tool-result { font-size: 11px; padding: 2px 0px 2px; }
+        .epart-cot-body .epart-tool-output { font-size: 10px; padding: 4px 6px; margin-top: 2px; }
+        .epart-tool-detail { margin-top: 2px; }
+        /* 工具调用详情 */
+        .epart-tool-query {
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+            padding: 2px 10px 4px; font-style: italic;
+        }
+        .epart-tool-result {
+            font-size: 12px; color: var(--md-sys-color-primary);
+            padding: 2px 10px 4px; font-weight: 500;
+        }
+        .epart-tool-output {
+            font-size: 11px; color: var(--md-sys-color-on-surface-variant);
+            padding: 4px 10px 6px; background: var(--md-sys-color-surface-container);
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            white-space: pre-wrap; word-break: break-word; line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        /* 编辑器消息编辑弹窗 */
+        .emsg-edit-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,.5); z-index: 1060; display: none;
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        .emsg-edit-overlay.active { display: flex; }
+        .emsg-edit-card {
+            background: var(--md-sys-color-surface); border-radius: 20px;
+            padding: 24px; width: 100%; max-width: 640px; max-height: 90vh;
+            display: flex; flex-direction: column; gap: 12px;
+            overflow-y: auto;
+        }
+        .emsg-edit-card label { font-size: 13px; color: var(--md-sys-color-on-surface-variant); font-weight: 500; }
+        .emsg-edit-card select, .emsg-edit-card input, .emsg-edit-card textarea {
+            padding: 10px 12px; border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 8px; background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface); font-size: 14px; width: 100%;
+            box-sizing: border-box;
+        }
+        .emsg-edit-card select, .emsg-edit-card input {
+            font-size: 15px;
+        }
+        .emsg-edit-card textarea {
+            min-height: 160px; resize: vertical; font-family: inherit;
+            font-size: 14px; line-height: 1.6;
+        }
+        .emsg-edit-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .emsg-edit-now-btn {
+            padding: 6px 12px; font-size: 12px;
+            background: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 6px; color: var(--md-sys-color-primary);
+            cursor: pointer; white-space: nowrap;
+        }
+        .emsg-edit-now-btn:hover {
+            background: var(--md-sys-color-primary-container);
+        }
+
+        .emsg-expand-btn {
+            background: none; border: none; font-size: 12px;
+            color: var(--md-sys-color-primary); cursor: pointer;
+            padding: 2px 6px; border-radius: 4px; margin-left: 4px;
+        }
+        .emsg-expand-btn:hover { background: var(--md-sys-color-primary-container); }
+
+        /* 全屏编辑器 */
+        .emsg-fullscreen-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,.7); z-index: 1070;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .emsg-fullscreen-card {
+            background: var(--md-sys-color-surface);
+            border-radius: 20px 20px 0 0;
+            width: 100%; max-width: 800px; height: 88vh;
+            display: flex; flex-direction: column;
+            padding: 16px 20px 24px;
+            box-shadow: 0 -4px 32px rgba(0,0,0,.3);
+            animation: sheetSlideUp .3s cubic-bezier(.22,.61,.36,1);
+        }
+        .emsg-fullscreen-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px; flex-shrink: 0;
+        }
+        .emsg-expand-close {
+            background: none; border: none; font-size: 20px;
+            color: var(--md-sys-color-on-surface-variant); cursor: pointer;
+            padding: 4px 8px; border-radius: 6px; line-height: 1;
+        }
+        .emsg-expand-close:hover { background: var(--md-sys-color-surface-container-high); }
+        .emsg-fullscreen-textarea {
+            flex: 1; width: 100%; padding: 12px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px; background: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface);
+            font-family: inherit; font-size: 15px; line-height: 1.7;
+            resize: none; box-sizing: border-box;
+        }
+        @media (max-width: 600px) {
+            .emsg-fullscreen-card { max-width: 100%; height: 85vh; padding: 14px 14px 20px; }
+            .emsg-fullscreen-textarea { font-size: 16px; }
+        }
+
+        /* 移动端编辑弹窗优化 */
+        @media (max-width: 600px) {
+            .emsg-edit-overlay {
+                align-items: flex-end;
+                padding: 0;
+                background: rgba(0,0,0,.7);
+            }
+            .emsg-edit-card {
+                max-width: 100%;
+                border-radius: 20px 20px 0 0;
+                padding: 20px 16px 24px;
+                max-height: 85vh;
+            }
+            .emsg-edit-card textarea {
+                min-height: 120px;
+                font-size: 16px; /* 防止 iOS 缩放 */
+            }
+            .emsg-edit-card select, .emsg-edit-card input {
+                font-size: 16px; /* 防止 iOS 缩放 */
+            }
+        }
         /* 关于页面 */
         .about-info {
             background: var(--md-sys-color-surface-container);
@@ -3272,26 +3313,34 @@
             </div>
         </div>
 
-        <!-- 会话工作台 -->
-        <div class="card workspace-card" id="workspaceCard" style="display: none;">
-            <div class="workspace-header">
-                <h3 id="workspaceCardTitle">对话工作台</h3>
-                <span class="workspace-meta" id="workspaceMeta">已选 0 / 0</span>
+        <!-- 工作台入口条 -->
+        <div class="card workspace-entry-bar" id="workspaceEntryBar" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:20px;">📝</span>
+                    <span id="workspaceEntryLabel" style="font-size:14px;color:var(--md-sys-color-on-surface);">已导入对话，可以在工作台中预览和整理</span>
+                </div>
+                <button class="btn-primary" onclick="openWorkspaceModal()" id="workspaceEntryBtn">编辑聊天记录</button>
             </div>
-            <div class="workspace-toolbar">
-                <input
-                    type="text"
-                    id="workspaceSearchInput"
-                    class="workspace-search"
-                    placeholder="搜索对话标题、来源或关键词..."
-                    oninput="renderWorkspaceList()"
-                >
-                <button class="btn-text" id="workspaceSelectAllBtn" type="button" onclick="setWorkspaceSelectionState(true)">全选</button>
-                <button class="btn-text" id="workspaceSelectNoneBtn" type="button" onclick="setWorkspaceSelectionState(false)">全不选</button>
-                <button class="btn-text" id="workspaceInvertSelectBtn" type="button" onclick="invertWorkspaceSelection()">反选</button>
-                <button class="btn-text" id="workspaceFullscreenBtn" type="button" onclick="toggleWorkspaceFullscreen()">放大编辑</button>
+        </div>
+
+        <!-- 工作台编辑器（全屏滑入页） -->
+        <div class="editor-page" id="workspaceEditorPage">
+            <div class="editor-topbar">
+                <button class="editor-back-btn" onclick="closeWorkspaceEditor()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+                    工作台
+                </button>
+                <span class="editor-title" id="editorTitle">对话详情</span>
+                <div class="editor-top-actions">
+                    <button class="btn-text" id="editorDeleteBtn" onclick="deleteWorkspaceConversation()" style="color: var(--md-sys-color-error);">🗑 删除</button>
+                </div>
             </div>
-            <div class="workspace-list" id="workspaceList"></div>
+            <div class="editor-meta" id="editorMeta">来源 · 消息数</div>
+            <div class="editor-messages" id="editorMessages">
+                <div class="editor-empty">正在加载消息...</div>
+            </div>
+            <div class="editor-bottombar" style="display:none;"></div>
         </div>
 
         <div class="card target-backup-card" id="rikkahubCard">
@@ -3610,6 +3659,30 @@
         </div>
     </div>
 
+    <!-- 对话工作台弹窗 -->
+    <div class="modal-overlay" id="modalWorkspace" onclick="closeWorkspaceModal(event)">
+        <div class="modal workspace-modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="workspaceModalTitle">📝 对话工作台</h3>
+                <button class="modal-close" onclick="closeWorkspaceModalDirect()">×</button>
+            </div>
+            <div class="modal-body workspace-modal-body">
+                <div class="workspace-header">
+                    <span class="workspace-meta" id="workspaceMeta">已选 0 / 0</span>
+                </div>
+                <div class="workspace-toolbar">
+                    <input type="text" id="workspaceSearchInput" class="workspace-search"
+                        placeholder="搜索对话标题、来源或关键词..." oninput="renderWorkspaceList()">
+                    <button class="btn-text" id="workspaceSelectAllBtn" onclick="setWorkspaceSelectionState(true)">全选</button>
+                    <button class="btn-text" id="workspaceSelectNoneBtn" onclick="setWorkspaceSelectionState(false)">全不选</button>
+                    <button class="btn-text" id="workspaceInvertSelectBtn" onclick="invertWorkspaceSelection()">反选</button>
+                    <button class="btn-text" id="workspaceDeleteSelectedBtn" onclick="deleteSelectedWorkspaceConversations()" style="color: var(--md-sys-color-error);">🗑 删除选中</button>
+                </div>
+                <div class="workspace-grid" id="workspaceList"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- 关于弹窗 -->
     <div class="modal-overlay" id="modalAbout">
         <div class="modal">
@@ -3789,72 +3862,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="workspaceConversationModal">
-        <div class="modal workspace-edit-modal">
-            <div class="modal-header">
-                <h3 class="modal-title">编辑对话</h3>
-                <button class="modal-close" onclick="closeWorkspaceConversationModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">来源</label>
-                    <input type="text" id="workspaceEditSourceInput" class="form-input" readonly>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">对话标题</label>
-                    <input type="text" id="workspaceEditTitleInput" class="form-input" placeholder="输入对话标题">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">创建时间</label>
-                        <input type="datetime-local" id="workspaceEditCreateInput" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">更新时间</label>
-                        <input type="datetime-local" id="workspaceEditUpdateInput" class="form-input">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 4px;">
-                        <input type="checkbox" id="workspaceEditSelectedInput" checked>
-                        <span style="font-size: 13px;">参与本次合并</span>
-                    </label>
-                </div>
-                <p id="workspaceEditHint" style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); line-height: 1.5; margin-top: 8px;"></p>
-                <div class="preview-actions">
-                    <button class="btn-text" onclick="closeWorkspaceConversationModal()" style="padding: 10px 20px; border: 1px solid var(--md-sys-color-outline);">取消</button>
-                    <button class="btn-primary" onclick="saveWorkspaceConversationEdit()" style="padding: 10px 20px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: var(--md-sys-shape-corner-small); cursor: pointer;">保存</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay workspace-preview-overlay" id="workspacePreviewModal" onclick="closeWorkspacePreviewModalOnOverlay(event)">
-        <div class="modal workspace-preview-modal">
-            <div class="modal-header">
-                <h3 class="modal-title" id="workspacePreviewModalTitle">对话预览</h3>
-                <button class="modal-close" onclick="closeWorkspacePreviewModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="workspace-preview-toolbar">
-                    <span class="workspace-preview-title" id="workspacePreviewModalMeta">显示 0 / 0 条消息</span>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                        <button
-                            type="button"
-                            class="workspace-action-btn"
-                            id="workspacePreviewToggleAllBtn"
-                            onclick="toggleWorkspacePreviewModalShowAll()"
-                            style="display: none;"
-                        >
-                            展开全部
-                        </button>
-                        <button type="button" class="workspace-action-btn" id="workspacePreviewEditBtn" onclick="openWorkspacePreviewConversationEditor()">编辑对话</button>
-                    </div>
-                </div>
-                <div class="workspace-preview-chat" id="workspacePreviewModalChat"></div>
-            </div>
-        </div>
-    </div>
 
     <script>
         let sourceData = null;
@@ -4489,11 +4496,13 @@
                 'btn.usage': '📖 使用说明',
                 'btn.support': '📋 支持列表明细',
                 'btn.about': 'ℹ️ 关于',
+                'btn.workspace': '📝 消息预览',
                 'btn.lang': '🌐 EN',
                 'modal.usage.title': '📖 使用说明',
                 'modal.usageMore.title': '📚 更多方法',
                 'modal.support.title': '📋 支持列表明细',
                 'modal.about.title': 'ℹ️ 关于',
+                'modal.workspace.title': '📝 消息预览',
                 'source.option.chatgpt': 'ChatGPT 数据',
                 'source.option.deepseek': 'DeepSeek 数据（新旧两个版本）',
                 'source.option.grok': 'Grok 数据（官方导出 ZIP）',
@@ -4511,11 +4520,16 @@
                 'source.status.loadedPrimary': '当前来源已加载 {count} 个对话',
                 'source.status.loadedDeepseekOld': '已加载旧版 {count} 个对话',
                 'workspace.title': '对话工作台',
+                'workspace.entryLabel': '已导入 {count} 个对话，可点击预览消息内容',
+                'workspace.date.today': '今天',
+                'workspace.date.yesterday': '昨天',
                 'workspace.meta': '已选 {selected} / {total}',
                 'workspace.searchPlaceholder': '搜索对话标题、来源或关键词...',
                 'workspace.selectAll': '全选',
                 'workspace.selectNone': '全不选',
                 'workspace.invert': '反选',
+                'workspace.deleteSelected': '🗑 删除选中',
+                'workspace.deleteConfirm': '确定要删除选中的 {count} 个对话吗？此操作不可撤销。',
                 'workspace.fullscreen.enter': '放大编辑',
                 'workspace.fullscreen.exit': '退出全屏',
                 'workspace.fullscreen.title.enter': '放大工作台，方便小屏编辑',
@@ -4527,7 +4541,7 @@
                 'workspace.timeUnknown': '时间未知',
                 'targetBackup.title': '第 2 步：选择 RikkaHub 原始备份',
                 'targetBackup.select': '选择备份 ZIP',
-                'targetBackup.hint': '建议先在对话工作台整理好内容，最后一步再选择 RikkaHub 的原始备份进行合并。你也可以现在先上传，后续会直接合并。',
+                'targetBackup.hint': '建议先点按上方"编辑聊天记录"在弹窗中整理内容，最后一步再选择 RikkaHub 的原始备份进行合并。你也可以现在先上传，后续会直接合并。',
                 'targetBackup.upload': '点击选择 RikkaHub 原始备份 ZIP',
                 'merge.duplicate.label': '遇到相同 ID 的对话时',
                 'merge.duplicate.skip': '跳过已有对话（更稳妥）',
@@ -4565,7 +4579,7 @@
                 'error.yasRemoved': '该导出文件入口仅支持 JSON，请上传正确文件或改用 Markdown 粘贴',
                 'error.readFileFailed': '读取文件失败: {message}',
                 'error.readFileGeneral': '读取文件时发生错误',
-                'error.zipTooSmall': '文件太小，不是有效的 ZIP 文件',
+                'error.zipTooSmall': '文件大小异常，可能不是有效的备份',
                 'error.zipInvalid': '文件不是有效的 ZIP 文件',
                 'error.chatgptNoConversationsJson': '压缩包中未找到 conversations.json 文件。请确保上传的是正确的 ChatGPT 导出文件。',
                 'info.chatgptLoaded': '已加载 {count} 个 ChatGPT 对话{imageMsg}',
@@ -4595,7 +4609,7 @@
                 'error.deepseekOldInvalidJson': '文件中的 JSON 格式错误。',
                 'info.deepseekOldLoaded': '已加载 DeepSeek 旧版数据，包含 {count} 个对话（从 {msgCount} 条消息）',
                 'error.rikkaMustZip': 'RikkaHub 文件必须是 .zip 格式',
-                'error.rikkaTooSmall': 'RikkaHub 文件太小，不是有效的 ZIP 文件',
+                'error.rikkaTooSmall': 'RikkaHub 文件大小异常，可能不是有效备份',
                 'error.rikkaInvalidZipPrefix': 'RikkaHub 文件不是有效的 ZIP 文件。文件前4字节: {prefix}',
                 'error.rikkaDbMissing': 'RikkaHub 压缩包中未找到 rikka_hub.db 文件。ZIP 文件中包含: {files}',
                 'info.rikkaDbLoadedWal': '已加载 RikkaHub 数据库（从 WAL 重建 {frameCount} 帧），包含 {count} 个对话',
@@ -4607,25 +4621,25 @@
                 'error.rikkaCoreTablesMissing': '未找到 ConversationEntity / message_node 表。当前表: {tables}。{walHint}',
                 'error.rikkaWalHintDetected': '已检测到 WAL，但无法从 WAL 重建对话表。',
                 'error.rikkaWalHintMissing': '未检测到 WAL 文件。',
-                'error.rikkaCorrupt': 'RikkaHub 文件不是有效的 ZIP 文件或文件已损坏。请确保：\\n1. 文件名以 .zip 结尾\\n2. 文件是从 RikkaHub 导出的完整备份\\n3. 尝试重新导出 RikkaHub 备份',
+                'error.rikkaCorrupt': 'RikkaHub 文件无效或已损坏。<br>1. 文件名以 .zip 结尾<br>2. 文件是从 RikkaHub 导出的完整备份<br>3. 尝试重新导出 RikkaHub 备份',
                 'error.rikkaDbFormat': 'RikkaHub 数据库文件格式错误。请确保文件完整。',
-                'error.rikkaReadFailed': '读取 RikkaHub 文件失败: {message}\\n提示：请上传从 RikkaHub 导出的 .zip 备份文件',
+                'error.rikkaReadFailed': '读取 RikkaHub 文件失败: {message}<br>提示：请上传从 RikkaHub 导出的 .zip 备份文件',
                 'error.rikkaReadGeneral': '读取 RikkaHub 文件时发生错误',
                 'error.mergeNeedSource': '请先上传源数据文件',
                 'error.mergeNeedSelection': '请先在对话工作台中勾选至少一个对话',
                 'info.mergeNeedRikka': '请先选择 RikkaHub 原始备份 ZIP；选完会自动继续合并。',
                 'info.mergeInit': '正在准备合并流程...',
-                'info.mergeInitDb': '正在检查并读取目标备份...',
-                'info.mergeCreateAssistant': '正在准备助手与归档信息...',
-                'info.mergePrepareImages': '正在整理 ChatGPT 图片引用...',
+                'info.mergeInitDb': '正在读取目标备份...',
+                'info.mergeCreateAssistant': '正在准备助手配置...',
+                'info.mergePrepareImages': '正在整理图片引用...',
                 'info.mergeProcessSources': '正在整理已选对话...',
                 'info.mergeLowMemoryMode': '检测到移动端或大批量数据，已启用低内存合并模式（分阶段处理，速度会稍慢）。',
                 'info.mergeDryRunReady': '合并确认信息已生成，请确认...',
                 'info.mergeCancelled': '已取消合并：未写入任何数据。',
                 'info.mergeWritingDb': '正在写入合并结果...',
-                'info.mergePrepareDb': '正在收尾并校验结果...',
-                'info.mergeGeneratingZip': '正在打包合并文件...',
-                'info.mergeGeneratingDownload': '正在准备下载文件...',
+                'info.mergePrepareDb': '正在校验并打包...',
+                'info.mergeGeneratingZip': '正在生成压缩包...',
+                'info.mergeGeneratingDownload': '正在准备下载...',
                 'error.mergeUnknownSchema': '无法识别 RikkaHub 对话表结构。检测到表: {tableList}',
                 'error.mergeReadConversationTable': '无法读取对话表: {message}',
                 'summary.mergeDryRun': '已选 {selected} 个对话，预计新增 {added} 个对话 / {messages} 条消息，跳过 {skipped} 个。',
@@ -4655,7 +4669,7 @@
                 'report.warning.none': '未发现结构风险。',
                 'fallback.youraiscrollConversationTitle': '导出对话',
                 'fallback.qwenConversationTitle': 'Qwen 对话',
-                'error.mergeFailed': '合并失败: {message}\\n\\n详细信息: {detail}'
+                'error.mergeFailed': '合并失败：{message}',
             },
             'en-US': {
                 'app.titleSuffix': 'Unified Conversation Workspace',
@@ -4680,11 +4694,13 @@
                 'btn.usage': '📖 Guide',
                 'btn.support': '📋 Support Matrix',
                 'btn.about': 'ℹ️ About',
+                'btn.workspace': '📝 Preview Messages',
                 'btn.lang': '🌐 中文',
                 'modal.usage.title': '📖 Guide',
                 'modal.usageMore.title': '📚 More Methods',
                 'modal.support.title': '📋 Support Matrix',
                 'modal.about.title': 'ℹ️ About',
+                'modal.workspace.title': '📝 Message Preview',
                 'source.option.chatgpt': 'ChatGPT Data',
                 'source.option.deepseek': 'DeepSeek Data (new + legacy)',
                 'source.option.grok': 'Grok Data (official export ZIP)',
@@ -4702,11 +4718,16 @@
                 'source.status.loadedPrimary': '{count} conversations loaded for current source',
                 'source.status.loadedDeepseekOld': 'Legacy loaded: {count} conversations',
                 'workspace.title': 'Conversation Workspace',
+                'workspace.entryLabel': 'Imported {count} conversations. Click to preview messages.',
+                'workspace.date.today': 'Today',
+                'workspace.date.yesterday': 'Yesterday',
                 'workspace.meta': 'Selected {selected} / {total}',
                 'workspace.searchPlaceholder': 'Search title, source, or keywords...',
                 'workspace.selectAll': 'Select All',
                 'workspace.selectNone': 'Clear',
                 'workspace.invert': 'Invert',
+                'workspace.deleteSelected': '🗑 Delete Selected',
+                'workspace.deleteConfirm': 'Delete {count} selected conversations? This cannot be undone.',
                 'workspace.fullscreen.enter': 'Expand Workspace',
                 'workspace.fullscreen.exit': 'Exit Fullscreen',
                 'workspace.fullscreen.title.enter': 'Expand workspace for easier editing on small screens',
@@ -4756,7 +4777,7 @@
                 'error.yasRemoved': 'This import channel supports JSON only. Upload a JSON file or use Paste Markdown.',
                 'error.readFileFailed': 'Failed to read file: {message}',
                 'error.readFileGeneral': 'An error occurred while reading file.',
-                'error.zipTooSmall': 'File is too small to be a valid ZIP.',
+                'error.zipTooSmall': 'File size is too small, may not be a valid backup.',
                 'error.zipInvalid': 'File is not a valid ZIP.',
                 'error.chatgptNoConversationsJson': 'conversations.json not found in ZIP. Please upload a valid ChatGPT export package.',
                 'info.chatgptLoaded': '{count} ChatGPT conversations loaded{imageMsg}',
@@ -4786,7 +4807,7 @@
                 'error.deepseekOldInvalidJson': 'JSON format in file is invalid.',
                 'info.deepseekOldLoaded': 'DeepSeek legacy loaded: {count} conversations (from {msgCount} messages)',
                 'error.rikkaMustZip': 'RikkaHub file must be .zip.',
-                'error.rikkaTooSmall': 'RikkaHub file is too small to be a valid ZIP.',
+                'error.rikkaTooSmall': 'RikkaHub file size is too small, may not be a valid backup.',
                 'error.rikkaInvalidZipPrefix': 'RikkaHub file is not a valid ZIP. First 4 bytes: {prefix}',
                 'error.rikkaDbMissing': 'rikka_hub.db not found in RikkaHub ZIP. Files in package: {files}',
                 'info.rikkaDbLoadedWal': 'RikkaHub DB loaded (recovered {frameCount} WAL frames), {count} conversations found',
@@ -4798,25 +4819,25 @@
                 'error.rikkaCoreTablesMissing': 'ConversationEntity / message_node table not found. Current tables: {tables}. {walHint}',
                 'error.rikkaWalHintDetected': 'WAL detected, but conversation tables could not be reconstructed from WAL.',
                 'error.rikkaWalHintMissing': 'WAL file not detected.',
-                'error.rikkaCorrupt': 'RikkaHub file is invalid or corrupted. Please ensure:\\n1) filename ends with .zip\\n2) file is full backup exported from RikkaHub\\n3) try exporting backup again',
+                'error.rikkaCorrupt': 'RikkaHub file is invalid or corrupted. Please ensure:<br>1) filename ends with .zip<br>2) file is full backup exported from RikkaHub<br>3) try exporting backup again',
                 'error.rikkaDbFormat': 'RikkaHub database format is invalid. Please verify file integrity.',
-                'error.rikkaReadFailed': 'Failed to read RikkaHub file: {message}\\nTip: upload a .zip backup exported from RikkaHub.',
+                'error.rikkaReadFailed': 'Failed to read RikkaHub file: {message}<br>Tip: upload a .zip backup exported from RikkaHub.',
                 'error.rikkaReadGeneral': 'An error occurred while reading RikkaHub file.',
                 'error.mergeNeedSource': 'Upload source data first.',
                 'error.mergeNeedSelection': 'Select at least one conversation in workspace first.',
                 'info.mergeNeedRikka': 'Select original RikkaHub backup ZIP first; merge continues automatically.',
                 'info.mergeInit': 'Preparing merge flow...',
-                'info.mergeInitDb': 'Reading and checking target backup...',
-                'info.mergeCreateAssistant': 'Preparing assistant/archive settings...',
-                'info.mergePrepareImages': 'Organizing ChatGPT image references...',
+                'info.mergeInitDb': 'Reading target backup...',
+                'info.mergeCreateAssistant': 'Preparing assistant settings...',
+                'info.mergePrepareImages': 'Organizing image references...',
                 'info.mergeProcessSources': 'Organizing selected conversations...',
                 'info.mergeLowMemoryMode': 'Low-memory merge mode enabled for mobile/large batches (two-pass processing, slower but more stable).',
                 'info.mergeDryRunReady': 'Merge review is ready. Waiting for confirmation...',
                 'info.mergeCancelled': 'Merge cancelled. No data was written.',
                 'info.mergeWritingDb': 'Writing merged result...',
-                'info.mergePrepareDb': 'Finalizing and validating result...',
-                'info.mergeGeneratingZip': 'Packaging merged file...',
-                'info.mergeGeneratingDownload': 'Preparing download file...',
+                'info.mergePrepareDb': 'Validating and packaging...',
+                'info.mergeGeneratingZip': 'Creating archive...',
+                'info.mergeGeneratingDownload': 'Preparing download...',
                 'error.mergeUnknownSchema': 'Unable to identify RikkaHub conversation table schema. Detected tables: {tableList}',
                 'error.mergeReadConversationTable': 'Failed to read conversation table: {message}',
                 'summary.mergeDryRun': 'Selected {selected} conversations. Estimated +{added} conversations / {messages} messages, skip {skipped}.',
@@ -4846,7 +4867,7 @@
                 'report.warning.none': 'No structure risk found.',
                 'fallback.youraiscrollConversationTitle': 'Exported Conversation',
                 'fallback.qwenConversationTitle': 'Qwen Conversation',
-                'error.mergeFailed': 'Merge failed: {message}\\n\\nDetails: {detail}'
+                'error.mergeFailed': 'Merge failed: {message}',
             }
         };
 
@@ -5353,10 +5374,12 @@
             setText('usageBtn', 'btn.usage');
             setText('supportBtn', 'btn.support');
             setText('aboutBtn', 'btn.about');
+            setText('workspaceEntryBtn', 'btn.workspace');
             setText('usageModalTitle', 'modal.usage.title');
             setText('usageMoreModalTitle', 'modal.usageMore.title');
             setText('supportModalTitle', 'modal.support.title');
             setText('aboutModalTitle', 'modal.about.title');
+            setText('workspaceModalTitle', 'modal.workspace.title');
             setText('sourceOptionChatgpt', 'source.option.chatgpt');
             setText('sourceOptionDeepseek', 'source.option.deepseek');
             setText('sourceOptionGrok', 'source.option.grok');
@@ -5366,11 +5389,10 @@
             setText('deepseekOldUploadCardTitle', 'source.upload.deepseekOld.title');
             setText('deepseekSecondUploadText', 'source.upload.deepseekOld');
             setText('pasteMarkdownBtn', 'source.upload.paste');
-            setText('workspaceCardTitle', 'workspace.title');
             setText('workspaceSelectAllBtn', 'workspace.selectAll');
             setText('workspaceSelectNoneBtn', 'workspace.selectNone');
             setText('workspaceInvertSelectBtn', 'workspace.invert');
-            setText('workspaceFullscreenBtn', 'workspace.fullscreen.enter');
+            setText('workspaceDeleteSelectedBtn', 'workspace.deleteSelected');
             setText('targetBackupTitle', 'targetBackup.title');
             setText('targetBackupSelectBtn', 'targetBackup.select');
             setText('targetBackupHint', 'targetBackup.hint');
@@ -5397,7 +5419,6 @@
             renderLocalizedModalContents();
             updateSourceUploadHintByType(currentDataSource);
             refreshSourceStatusInfoTexts();
-            updateWorkspaceFullscreenButton();
             updateLanguageToggleButton();
         }
 
@@ -5447,13 +5468,12 @@
             youraiscroll: { userNickname: null, assistantName: null },
             qwen: { userNickname: null, assistantName: null }
         };
-        let workspaceEditContext = null;
-        let workspacePreviewState = {
+        let editorState = {
             workspaceId: null,
-            showAll: false,
-            customConversation: null
+            messages: [],
+            originalItem: null,
+            originalConversation: null
         };
-        let workspaceFullscreen = false;
 
         function ensureSourcePoolBucket(sourceType) {
             if (!importedSourcePool[sourceType] || typeof importedSourcePool[sourceType] !== 'object') {
@@ -5481,17 +5501,19 @@
                 return true;
             }
 
-            const sourceTypes = ['chatgpt', 'deepseek', 'grok', 'youraiscroll', 'qwen'];
-            return sourceTypes.some(type => {
-                const bucket = ensureSourcePoolBucket(type);
-                const primaryCount = Array.isArray(bucket.sourceData)
+            var sourceTypes = ['chatgpt', 'deepseek', 'grok', 'youraiscroll', 'qwen'];
+            for (var sti = 0; sti < sourceTypes.length; sti++) {
+                var type = sourceTypes[sti];
+                var bucket = ensureSourcePoolBucket(type);
+                var primaryCount = Array.isArray(bucket.sourceData)
                     ? bucket.sourceData.length
                     : (bucket.sourceData ? 1 : 0);
-                const secondaryCount = Array.isArray(bucket.secondSourceData)
+                var secondaryCount = Array.isArray(bucket.secondSourceData)
                     ? bucket.secondSourceData.length
                     : (bucket.secondSourceData ? 1 : 0);
-                return (primaryCount + secondaryCount) > 0;
-            });
+                if ((primaryCount + secondaryCount) > 0) return true;
+            }
+            return false;
         }
 
         function resetPendingRikkaCompatSettings() {
@@ -5604,16 +5626,17 @@
             };
             sourceData = null;
             secondSourceData = null;
-            workspacePreviewState = {
+            editorState = {
                 workspaceId: null,
-                showAll: false,
-                customConversation: null
+                messages: [],
+                originalItem: null,
+                originalConversation: null
             };
             const searchInput = document.getElementById('workspaceSearchInput');
             if (searchInput) {
                 searchInput.value = '';
             }
-            closeWorkspacePreviewModal();
+            closeWorkspaceEditor();
             renderWorkspaceList();
         }
 
@@ -5624,6 +5647,108 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        // 将 UIMessage.parts 转换为编辑器结构化数据
+        function extractPartsForEditor(parts) {
+            if (!parts || !Array.isArray(parts)) return [];
+            var result = [];
+            for (var pi = 0; pi < parts.length; pi++) {
+                var p = parts[pi];
+                if (p.type === 'reasoning' && p.reasoning && p.reasoning.trim()) {
+                    result.push({ type: 'reasoning', content: p.reasoning });
+                } else if (p.type === 'text' && p.text && p.text.trim()) {
+                    result.push({ type: 'text', content: p.text });
+                } else if (p.type === 'tool') {
+                    var toolName = p.toolName || 'TOOL';
+                    var info = { type: 'tool', toolName: toolName };
+                    // 提取搜索关键词
+                    if (p.input) {
+                        try {
+                            var inp = typeof p.input === 'string' ? JSON.parse(p.input) : p.input;
+                            var query = inp.q || inp.query || inp.prompt || '';
+                            if (query) info.preview = query;
+                        } catch(e) {}
+                    }
+                    // 提取工具输出结果
+                    if (p.output && Array.isArray(p.output)) {
+                        for (var oi = 0; oi < p.output.length; oi++) {
+                            var out = p.output[oi];
+                            if (out.type === 'text' && out.text && out.text.trim()) {
+                                var resultText = out.text;
+                                // SEARCH 结果特殊处理：显示条数
+                                if (toolName === 'SEARCH' && resultText.indexOf('total_results') >= 0) {
+                                    try {
+                                        var parsed = JSON.parse(resultText);
+                                        if (parsed.items && Array.isArray(parsed.items)) {
+                                            info.resultCount = parsed.items.length;
+                                            info.outputPreview = resultText;
+                                        }
+                                    } catch(e) {}
+                                } else {
+                                    info.outputPreview = resultText.slice(0, 120);
+                                }
+                            }
+                        }
+                    }
+                    result.push(info);
+                }
+            }
+            return result;
+        }
+
+        // 工具图标映射（仿 RikkaHub getToolIcon）
+        function getToolIcon(toolName) {
+            var name = String(toolName || '').toLowerCase();
+            if (name === 'search' || name === 'tool_search') return '🔍';
+            if (name === 'tool_open' || name === 'scrape_web') return '🌐';
+            if (name === 'read_link') return '📄';
+            if (name === 'tool_find') return '🔎';
+            if (name === 'memory_tool') return '🧠';
+            if (name === 'get_time_info') return '🕐';
+            if (name === 'ask_user') return '💬';
+            return '🔧';
+        }
+        // 工具展示名
+        function getToolLabel(toolName) {
+            var name = String(toolName || '').toUpperCase();
+            if (name === 'TOOL_SEARCH') return '搜索';
+            if (name === 'SEARCH') return '网络搜索';
+            if (name === 'TOOL_OPEN') return '打开网页';
+            if (name === 'READ_LINK') return '读取链接';
+            if (name === 'TOOL_FIND') return '查找';
+            if (name === 'MEMORY_TOOL') return '记忆';
+            if (name === 'GET_TIME_INFO') return '获取时间';
+            if (name === 'ASK_USER') return '询问用户';
+            return name;
+        }
+
+        // 将结构化 parts 合并为可编辑的纯文本（供编辑弹窗使用）
+        function flattenPartsToText(parts) {
+            if (!parts || !Array.isArray(parts)) return '';
+            var texts = [];
+            for (var pi = 0; pi < parts.length; pi++) {
+                var p = parts[pi];
+                if (p.type === 'reasoning') texts.push('[思考] ' + p.content);
+                else if (p.type === 'tool') texts.push('[工具: ' + p.toolName + ']');
+                else if (p.type === 'text') texts.push(p.content);
+            }
+            return texts.join('\n\n');
+        }
+
+        // 将时间戳转为 datetime-local 输入框的本地时间值
+        function toDatetimeLocalValue(ts) {
+            if (!ts) return '';
+            var s = String(ts).trim();
+            // 如果没有时区信息且长度足够，直接切片（本地时间格式）
+            if (s.length >= 16 && !/[Zz+\-]/.test(s.substring(10))) {
+                return s.substring(0, 16);
+            }
+            // 有时区信息，转为本地时间
+            var d = new Date(s);
+            if (isNaN(d.getTime())) return s.substring(0, 16);
+            var localD = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+            return localD.toISOString().slice(0, 16);
         }
 
         function normalizeTimestampToMs(value) {
@@ -5650,6 +5775,24 @@
             } catch (error) {
                 return new Date(ms).toISOString();
             }
+        }
+
+        // 仿 RikkaHub：按时间分组标签（今天/昨天/具体日期）
+        function getWorkspaceDateGroup(ms) {
+            if (!ms) return '';
+            var d = new Date(ms);
+            var now = new Date();
+            var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            var yesterday = new Date(today.getTime() - 86400000);
+            var msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            if (msgDate.getTime() === today.getTime()) return t('workspace.date.today');
+            if (msgDate.getTime() === yesterday.getTime()) return t('workspace.date.yesterday');
+            // 具体日期：当年不显示年
+            var year = d.getFullYear();
+            if (year === now.getFullYear()) {
+                return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+            }
+            return year + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
         }
 
         function estimateChatGPTConversationMessageCount(conv) {
@@ -5906,6 +6049,13 @@
                 });
             }
 
+            // 按时间从新到老排序（最近对话在前）
+            conversations.sort(function(a, b) {
+                var ta = a.updatedAtMs || a.createdAtMs || 0;
+                var tb = b.updatedAtMs || b.createdAtMs || 0;
+                return tb - ta;
+            });
+
             workspaceStore = {
                 sourceType: 'all',
                 conversations: conversations,
@@ -5916,729 +6066,599 @@
             checkReady();
         }
 
-        function updateWorkspaceFullscreenButton() {
-            const button = document.getElementById('workspaceFullscreenBtn');
-            if (!button) return;
-            const enterMode = workspaceFullscreen !== true;
-            button.textContent = enterMode
-                ? t('workspace.fullscreen.enter')
-                : t('workspace.fullscreen.exit');
-            button.title = enterMode
-                ? t('workspace.fullscreen.title.enter')
-                : t('workspace.fullscreen.title.exit');
-            button.setAttribute('aria-pressed', workspaceFullscreen ? 'true' : 'false');
-        }
 
-        function setWorkspaceFullscreenState(enable) {
-            const card = document.getElementById('workspaceCard');
-            const next = !!enable;
-
-            workspaceFullscreen = next;
-
-            if (card) {
-                card.classList.toggle('workspace-fullscreen', next);
-                if (card.style.display !== 'none') {
-                    // renderWorkspaceList 会写入 inline display:block；全屏时需改成 flex 才能让列表区域滚动
-                    card.style.display = next ? 'flex' : 'block';
-                }
-            }
-
-            document.body.classList.toggle('workspace-fullscreen-open', next);
-            updateWorkspaceFullscreenButton();
-        }
-
-        function toggleWorkspaceFullscreen(force) {
-            const card = document.getElementById('workspaceCard');
-            const targetState = typeof force === 'boolean' ? force : !workspaceFullscreen;
-            if (targetState && (!card || card.style.display === 'none')) {
-                return;
-            }
-            setWorkspaceFullscreenState(targetState);
-        }
-
+        // ===== 卡片网格渲染 =====
         function renderWorkspaceList() {
-            const card = document.getElementById('workspaceCard');
-            const meta = document.getElementById('workspaceMeta');
             const list = document.getElementById('workspaceList');
-            const searchInput = document.getElementById('workspaceSearchInput');
-            if (!card || !meta || !list) return;
+            const entryBar = document.getElementById('workspaceEntryBar');
+            const entryLabel = document.getElementById('workspaceEntryLabel');
+            if (!list) return;
 
-            const allConversations = Array.isArray(workspaceStore.conversations) ? workspaceStore.conversations : [];
-            const shouldShow = allConversations.length > 0;
-            if (!shouldShow) {
-                if (workspaceFullscreen) {
-                    setWorkspaceFullscreenState(false);
-                }
-                card.style.display = 'none';
-                list.innerHTML = '';
-                meta.textContent = t('workspace.meta', { selected: 0, total: 0 });
-                updateWorkspaceFullscreenButton();
+            const conversations = Array.isArray(workspaceStore.conversations) ? workspaceStore.conversations : [];
+            if (conversations.length === 0) {
+                if (entryBar) entryBar.style.display = 'none';
+                return;
+            }
+            // 显示入口条：已导入 N 个对话
+            if (entryBar) entryBar.style.display = '';
+            if (entryLabel) entryLabel.textContent = t('workspace.entryLabel').replace('{count}', conversations.length);
+
+            // 搜索过滤
+            const query = (document.getElementById('workspaceSearchInput')?.value || '').toLowerCase().trim();
+            const visible = query
+                ? conversations.filter(c => (c.title || '').toLowerCase().includes(query) || (c.sourceLabel || '').toLowerCase().includes(query))
+                : conversations;
+
+            // 统计
+            const selectedCount = visible.filter(c => c.selected !== false).length;
+            const metaEl = document.getElementById('workspaceMeta');
+            if (metaEl) metaEl.textContent = `已选 ${selectedCount} / ${visible.length}`;
+
+            if (visible.length === 0) {
+                list.innerHTML = '<div class="workspace-empty">没有匹配的对话</div>';
                 return;
             }
 
-            card.style.display = workspaceFullscreen ? 'flex' : 'block';
-            const selectedCount = allConversations.filter(item => item.selected !== false).length;
-            meta.textContent = t('workspace.meta', { selected: selectedCount, total: allConversations.length });
-            card.classList.toggle('workspace-fullscreen', workspaceFullscreen);
-            updateWorkspaceFullscreenButton();
-
-            const keyword = String(searchInput?.value || '').trim().toLowerCase();
-            const visibleConversations = keyword
-                ? allConversations.filter(item => {
-                    const haystack = `${item.title || ''} ${item.sourceLabel || ''}`.toLowerCase();
-                    return haystack.includes(keyword);
-                })
-                : allConversations;
-
-            if (visibleConversations.length === 0) {
-                list.innerHTML = `<div class="workspace-empty">${escapeWorkspaceHtml(t('workspace.noMatch'))}</div>`;
-                return;
-            }
-
-            list.innerHTML = visibleConversations.map(item => {
-                const subtitleParts = [];
-                subtitleParts.push(t('workspace.messageCount', { count: item.messageCount || 0 }));
-                subtitleParts.push(formatWorkspaceTimestamp(item.updatedAtMs || item.createdAtMs));
-                return `
-                    <div class="workspace-item">
-                        <div class="workspace-row">
-                            <input
-                                type="checkbox"
-                                class="workspace-checkbox"
-                                data-id="${escapeWorkspaceHtml(item.id)}"
-                                ${item.selected !== false ? 'checked' : ''}
-                            >
-                            <div class="workspace-row-main">
-                                <div class="workspace-row-title">${escapeWorkspaceHtml(item.title || 'Untitled')}</div>
-                                <div class="workspace-row-sub">${escapeWorkspaceHtml(subtitleParts.join(' · '))}</div>
-                            </div>
-                            <span class="workspace-badge">${escapeWorkspaceHtml(item.sourceLabel || 'Source')}</span>
-                            <div class="workspace-row-actions">
-                                <button
-                                    type="button"
-                                    class="workspace-action-btn"
-                                    data-action="preview"
-                                    data-id="${escapeWorkspaceHtml(item.id)}"
-                                >
-                                    ${escapeWorkspaceHtml(t('workspace.preview'))}
-                                </button>
-                                <button
-                                    type="button"
-                                    class="workspace-action-btn"
-                                    data-action="edit"
-                                    data-id="${escapeWorkspaceHtml(item.id)}"
-                                >
-                                    ${escapeWorkspaceHtml(t('workspace.edit'))}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+            list.innerHTML = visible.map(function(item, idx) {
+                var selClass = item.selected !== false ? ' selected' : '';
+                var checked = item.selected !== false ? ' checked' : '';
+                var timeStr = formatWorkspaceTimestamp(item.createdAtMs || item.updatedAtMs);
+                // 日期分组标题
+                var dateLabel = getWorkspaceDateGroup(item.updatedAtMs || item.createdAtMs);
+                var prevDateLabel = idx > 0 ? getWorkspaceDateGroup(visible[idx - 1].updatedAtMs || visible[idx - 1].createdAtMs) : '';
+                var dateHeader = (dateLabel !== prevDateLabel) ? '<div class="ws-date-header">' + dateLabel + '</div>' : '';
+                return dateHeader + '<div class="ws-card' + selClass + '" data-wid="' + item.id + '" onclick="openWorkspaceEditor(\'' + item.id + '\')">' +
+                    '<div class="ws-card-header">' +
+                    '<input type="checkbox" class="ws-card-check" ' + checked +
+                    ' onclick="event.stopPropagation(); toggleWorkspaceConversation(\'' + item.id + '\', this.checked)">' +
+                    '<span class="ws-card-title">' + escapeWorkspaceHtml(item.title) + '</span>' +
+                    '</div>' +
+                    '<div class="ws-card-meta">' +
+                    '<span>' + item.messageCount + ' 条消息</span>' +
+                    '<span class="ws-card-badge">' + escapeWorkspaceHtml(item.sourceLabel) + '</span>' +
+                    (timeStr ? '<span>' + timeStr + '</span>' : '') +
+                    '</div>' +
+                    '</div>';
             }).join('');
 
-            list.querySelectorAll('.workspace-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', event => {
-                    const id = event.target.getAttribute('data-id');
-                    toggleWorkspaceConversation(id, event.target.checked);
-                });
-            });
-
-            list.querySelectorAll('.workspace-action-btn[data-action="edit"]').forEach(button => {
-                button.addEventListener('click', event => {
-                    const id = event.target.getAttribute('data-id');
-                    openWorkspaceConversationEditor(id);
-                });
-            });
-
-            list.querySelectorAll('.workspace-action-btn[data-action="preview"]').forEach(button => {
-                button.addEventListener('click', event => {
-                    const id = event.target.getAttribute('data-id');
-                    openWorkspaceConversationPreview(id);
-                });
-            });
+            checkReady();
         }
 
+        // ===== 全选/全不选/反选 =====
         function toggleWorkspaceConversation(workspaceId, selected) {
-            const target = (workspaceStore.conversations || []).find(item => item.id === workspaceId);
-            if (!target) return;
-            target.selected = !!selected;
-            renderWorkspaceList();
-            checkReady();
+            const item = (workspaceStore.conversations || []).find(c => c.id === workspaceId);
+            if (item) {
+                item.selected = selected === true;
+                renderWorkspaceList();
+            }
         }
 
         function setWorkspaceSelectionState(selected) {
-            if (!Array.isArray(workspaceStore.conversations) || workspaceStore.conversations.length === 0) return;
-            workspaceStore.conversations.forEach(item => {
-                item.selected = !!selected;
-            });
+            (workspaceStore.conversations || []).forEach(item => { item.selected = selected; });
             renderWorkspaceList();
-            checkReady();
         }
 
         function invertWorkspaceSelection() {
-            if (!Array.isArray(workspaceStore.conversations) || workspaceStore.conversations.length === 0) return;
-            workspaceStore.conversations.forEach(item => {
-                item.selected = item.selected === false;
-            });
+            (workspaceStore.conversations || []).forEach(item => { item.selected = item.selected !== true; });
             renderWorkspaceList();
-            checkReady();
         }
 
-        function toPreviewMessageObjectsFromRikkaMessages(rikkaMessages, baseMs = Date.now()) {
-            if (!Array.isArray(rikkaMessages)) return [];
-            return rikkaMessages.map((msg, index) => {
-                const content = extractTextFromRikkaParts(msg?.parts || []);
-                const fallbackMs = baseMs + (index * 1000);
-                const timestamp = normalizeIsoString(msg?.createdAt || msg?.timestamp, fallbackMs);
-                return {
-                    role: normalizeMessageRole(msg?.role) || 'assistant',
-                    content: String(content || '').trim(),
-                    timestamp: timestamp
-                };
-            }).filter(msg => msg.content);
-        }
-
-        function getWorkspaceConversationPreviewMessages(workspaceId) {
-            const binding = getWorkspaceConversationBinding(workspaceId);
-            if (!binding) return [];
-
-            const { item, conversation } = binding;
-            if (Array.isArray(conversation?._editedMessages) && conversation._editedMessages.length > 0) {
-                const baseMs = item.createdAtMs || Date.now();
-                const editedPreviewMessages = conversation._editedMessages.map((msg, index) => ({
-                    role: normalizeMessageRole(msg?.role) || 'assistant',
-                    content: String(msg?.content || '').trim(),
-                    timestamp: normalizeIsoString(msg?.timestamp, baseMs + (index * 1000))
-                })).filter(msg => msg.content);
-                item.previewMessages = editedPreviewMessages;
-                return editedPreviewMessages;
-            }
-
-            if (Array.isArray(item.previewMessages) && item.previewMessages.length > 0) {
-                return item.previewMessages;
-            }
-
-            let previewMessages = [];
-            const baseMs = item.createdAtMs || Date.now();
-            const sourceType = item.dataSource || currentDataSource;
-
-            try {
-                if (sourceType === 'chatgpt') {
-                    const mapping = conversation?.mapping || {};
-                    const currentNode = conversation?.current_node;
-                    const rikkahubMessages = extractMessages(mapping, currentNode, null, null);
-                    previewMessages = toPreviewMessageObjectsFromRikkaMessages(rikkahubMessages, baseMs);
-                } else if (sourceType === 'deepseek' && item.bucket === 'sourceData') {
-                    const mapping = conversation?.mapping || {};
-                    const rikkahubMessages = extractDeepSeekMessages(mapping, null);
-                    previewMessages = toPreviewMessageObjectsFromRikkaMessages(rikkahubMessages, baseMs);
-                } else if (sourceType === 'deepseek' && item.bucket === 'secondSourceData') {
-                    previewMessages = (Array.isArray(conversation?.messages) ? conversation.messages : [])
-                        .map((msg, index) => {
-                            const role = normalizeMessageRole(msg?.role) || 'assistant';
-                            const content = String(msg?.content || '').trim();
-                            const timestamp = normalizeIsoString(msg?.time || msg?.timestamp, baseMs + (index * 1000));
-                            return { role, content, timestamp };
-                        })
-                        .filter(msg => msg.content);
-                } else if (sourceType === 'youraiscroll' || sourceType === 'qwen') {
-                    const editableMessages = buildPreviewEditableMessages(conversation);
-                    previewMessages = editableMessages.map(msg => ({
-                        role: normalizeMessageRole(msg?.role) || 'assistant',
-                        content: String(msg?.content || '').trim(),
-                        timestamp: normalizeIsoString(msg?.timestamp, baseMs)
-                    })).filter(msg => msg.content);
-                } else if (sourceType === 'grok') {
-                    const editableMessages = buildPreviewEditableMessages(conversation);
-                    previewMessages = editableMessages.map(msg => ({
-                        role: normalizeMessageRole(msg?.role) || 'assistant',
-                        content: String(msg?.content || '').trim(),
-                        timestamp: normalizeIsoString(msg?.timestamp, baseMs)
-                    })).filter(msg => msg.content);
-                }
-            } catch (error) {
-                console.warn('failed to build workspace preview messages:', error);
-                previewMessages = [];
-            }
-
-            item.previewMessages = previewMessages;
-            return previewMessages;
-        }
-
-        function resolvePreviewSourceLabel(sourceType) {
-            const normalized = String(sourceType || '').trim().toLowerCase();
-            if (!normalized) return 'Source';
-            if (normalized === 'chatgpt') return 'ChatGPT';
-            if (normalized === 'deepseek') return 'DeepSeek';
-            if (normalized === 'youraiscroll') return 'Exported JSON';
-            if (normalized === 'qwen') return 'Qwen';
-            if (normalized === 'grok') return 'Grok';
-            return getPlatformName(normalized) || sourceType;
-        }
-
-        function getWorkspacePreviewRoleMeta(role) {
-            const normalized = normalizeMessageRole(role) || 'assistant';
-            if (normalized === 'user') {
-                return { role: 'user', label: '用户', avatar: 'U' };
-            }
-            if (normalized === 'assistant') {
-                return { role: 'assistant', label: '助手', avatar: 'A' };
-            }
-            if (normalized === 'system') {
-                return { role: 'system', label: '系统', avatar: 'S' };
-            }
-            return { role: 'tool', label: '工具', avatar: 'T' };
-        }
-
-        function showWorkspacePreviewModalPanel() {
-            const modal = document.getElementById('workspacePreviewModal');
-            if (modal) {
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function openWorkspacePreviewWithCustomConversation(conversationLike) {
-            const rawMessages = Array.isArray(conversationLike?.messages) ? conversationLike.messages : [];
-            const baseMs = Date.now();
-            const normalizedMessages = rawMessages.map((msg, index) => {
-                const fallbackMs = baseMs + (index * 1000);
-                return {
-                    role: normalizeMessageRole(msg?.role) || 'assistant',
-                    content: String(msg?.content || '').trim(),
-                    timestamp: normalizeIsoString(msg?.timestamp, fallbackMs)
-                };
-            }).filter(msg => msg.content);
-
-            workspacePreviewState = {
-                workspaceId: null,
-                showAll: false,
-                customConversation: {
-                    title: String(conversationLike?.title || 'Untitled'),
-                    sourceLabel: String(conversationLike?.sourceLabel || 'Source'),
-                    messages: normalizedMessages
-                }
-            };
-            renderWorkspacePreviewModal();
-            showWorkspacePreviewModalPanel();
-        }
-
-        function openWorkspaceConversationPreview(workspaceId) {
-            const target = (workspaceStore.conversations || []).find(item => item.id === workspaceId);
-            if (!target) return;
-
-            workspacePreviewState = {
-                workspaceId: workspaceId,
-                showAll: false,
-                customConversation: null
-            };
-            renderWorkspacePreviewModal();
-            showWorkspacePreviewModalPanel();
-        }
-
-        function closeWorkspacePreviewModal() {
-            const modal = document.getElementById('workspacePreviewModal');
-            if (modal) {
-                modal.classList.remove('active');
-            }
-            workspacePreviewState = {
-                workspaceId: null,
-                showAll: false,
-                customConversation: null
-            };
-            document.body.style.overflow = '';
-        }
-
-        function closeWorkspacePreviewModalOnOverlay(event) {
-            if (event.target === event.currentTarget) {
-                closeWorkspacePreviewModal();
-            }
-        }
-
-        function renderWorkspacePreviewModal() {
-            const defaultCount = 12;
-            const titleElement = document.getElementById('workspacePreviewModalTitle');
-            const metaElement = document.getElementById('workspacePreviewModalMeta');
-            const chatElement = document.getElementById('workspacePreviewModalChat');
-            const toggleBtn = document.getElementById('workspacePreviewToggleAllBtn');
-            const editBtn = document.getElementById('workspacePreviewEditBtn');
-            if (!titleElement || !metaElement || !chatElement || !toggleBtn || !editBtn) return;
-
-            const workspaceId = workspacePreviewState.workspaceId;
-            const customConversation = workspacePreviewState.customConversation;
-
-            let title = 'Untitled';
-            let sourceLabel = 'Source';
-            let messages = [];
-            let allowEdit = false;
-
-            if (customConversation && Array.isArray(customConversation.messages)) {
-                title = String(customConversation.title || 'Untitled');
-                sourceLabel = String(customConversation.sourceLabel || 'Source');
-                messages = customConversation.messages;
-                allowEdit = false;
-            } else {
-                if (!workspaceId) return;
-                const binding = getWorkspaceConversationBinding(workspaceId);
-                if (!binding) {
-                    closeWorkspacePreviewModal();
-                    return;
-                }
-                const { item } = binding;
-                title = String(item?.title || 'Untitled');
-                sourceLabel = String(item?.sourceLabel || 'Source');
-                messages = getWorkspaceConversationPreviewMessages(workspaceId);
-                allowEdit = true;
-            }
-
-            const total = messages.length;
-            const showAll = workspacePreviewState.showAll === true;
-            const visibleMessages = showAll ? messages : messages.slice(Math.max(total - defaultCount, 0));
-
-            titleElement.textContent = sourceLabel ? `${title} · ${sourceLabel}` : title;
-            metaElement.textContent = `显示 ${visibleMessages.length} / ${total} 条消息`;
-            editBtn.style.display = allowEdit ? 'inline-block' : 'none';
-
-            if (total > defaultCount) {
-                toggleBtn.style.display = 'inline-block';
-                toggleBtn.textContent = showAll ? `仅看最近 ${defaultCount} 条` : `展开全部 ${total} 条`;
-            } else {
-                toggleBtn.style.display = 'none';
-            }
-
-            if (visibleMessages.length === 0) {
-                chatElement.innerHTML = '<div class="workspace-preview-empty">此对话暂无可预览消息</div>';
+        async function deleteSelectedWorkspaceConversations() {
+            const conversations = workspaceStore.conversations || [];
+            const selected = conversations.filter(c => c.selected !== false);
+            if (selected.length === 0) {
+                showToast('提示', '没有选中任何对话', 'warning', 3000);
                 return;
             }
-
-            chatElement.innerHTML = visibleMessages.map(msg => {
-                const roleMeta = getWorkspacePreviewRoleMeta(msg?.role);
-                const text = String(msg?.content || '').trim() || '[空消息]';
-                const timestampText = formatWorkspaceTimestamp(normalizeTimestampToMs(msg?.timestamp));
-                const previewHtml = renderPreviewMessageHtml(text);
-                return `
-                    <div class="workspace-preview-message ${escapeWorkspaceHtml(roleMeta.role)}">
-                        <div class="workspace-preview-avatar">${escapeWorkspaceHtml(roleMeta.avatar)}</div>
-                        <div class="workspace-preview-content">
-                            <div class="workspace-preview-head">
-                                <span class="workspace-preview-role">${escapeWorkspaceHtml(roleMeta.label)}</span>
-                                <span class="workspace-preview-time">${escapeWorkspaceHtml(timestampText)}</span>
-                            </div>
-                            <div class="workspace-preview-bubble">
-                                <div class="workspace-preview-rich">${previewHtml}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const confirmed = await showConfirmBar(t('workspace.deleteConfirm').replace('{count}', selected.length));
+            if (!confirmed) return;
+            workspaceStore.conversations = conversations.filter(c => c.selected === false);
+            workspaceStore.updatedAt = Date.now();
+            renderWorkspaceList();
+            showToast('提示', '已删除 ' + selected.length + ' 个对话', 'success', 3000);
         }
 
-        function toggleWorkspacePreviewModalShowAll() {
-            if (!workspacePreviewState.workspaceId && !workspacePreviewState.customConversation) return;
-            workspacePreviewState.showAll = workspacePreviewState.showAll !== true;
-            renderWorkspacePreviewModal();
-        }
+        // ===== 打开编辑器 =====
+        function openWorkspaceEditor(workspaceId) {
+            const item = (workspaceStore.conversations || []).find(c => c.id === workspaceId);
+            if (!item) return;
 
-        function openWorkspacePreviewConversationEditor() {
-            const workspaceId = workspacePreviewState.workspaceId;
-            if (!workspaceId) return;
-            closeWorkspacePreviewModal();
-            openWorkspaceConversationEditor(workspaceId);
-        }
+            const binding = getWorkspaceConversationBinding(workspaceId);
+            if (!binding) return;
 
-        function getWorkspaceConversationBinding(workspaceId) {
-            const item = (workspaceStore.conversations || []).find(conv => conv.id === workspaceId);
-            if (!item) return null;
+            const previewData = getWorkspaceConversationPreviewMessages(workspaceId);
+            const conv = binding.conversation || {};
 
-            const sourceType = item.dataSource || currentDataSource;
-            const sourceBucket = ensureSourcePoolBucket(sourceType);
-            const bucketData = item.bucket === 'secondSourceData'
-                ? sourceBucket.secondSourceData
-                : sourceBucket.sourceData;
-            if (!Array.isArray(bucketData)) return null;
-
-            const conversation = bucketData[item.rawIndex];
-            if (!conversation) return null;
-
-            return { item, conversation };
-        }
-
-        function normalizeIsoString(input, fallbackMs = Date.now()) {
-            const normalizedMs = normalizeTimestampToMs(input);
-            const safeMs = normalizedMs && Number.isFinite(normalizedMs) ? normalizedMs : fallbackMs;
-            return new Date(safeMs).toISOString();
-        }
-
-        function parseDateTimeInputToMs(inputValue, fallbackMs) {
-            const parsedMs = new Date(String(inputValue || '')).getTime();
-            if (!Number.isFinite(parsedMs)) return fallbackMs;
-            return parsedMs;
-        }
-
-        function extractTextFromRikkaParts(parts) {
-            if (!Array.isArray(parts) || parts.length === 0) return '';
-            const stringifyToolPayload = (value) => {
-                if (value == null) return '';
-                if (typeof value === 'string') return value;
-
-                if (Array.isArray(value)) {
-                    return value.map(item => {
-                        if (item == null) return '';
-                        if (typeof item === 'string') return item;
-                        if (typeof item === 'object') {
-                            const nestedType = String(item.type || '');
-                            // 兼容新旧两种格式
-                            if (isPartType(nestedType, 'TEXT')) {
-                                return String(item.text || '');
-                            }
-                            if (isPartType(nestedType, 'REASONING')) {
-                                return String(item.reasoning || '');
-                            }
-                            if (isPartType(nestedType, 'IMAGE')) {
-                                return String(item.url || '');
-                            }
-                            if (item.text != null) return String(item.text);
-                            if (item.content != null) return String(item.content);
-                        }
-                        try {
-                            return JSON.stringify(item, null, 2);
-                        } catch (error) {
-                            return String(item);
-                        }
-                    }).filter(Boolean).join('\n').trim();
-                }
-
-                if (typeof value === 'object') {
-                    if (value.text != null) return String(value.text);
-                    if (value.content != null) return String(value.content);
-                    try {
-                        return JSON.stringify(value, null, 2);
-                    } catch (error) {
-                        return String(value);
-                    }
-                }
-
-                return String(value);
-            };
-
-            return parts.map(part => {
-                const partType = String(part?.type || '');
-                // 使用 isPartType 兼容新旧两种格式
-                if (isPartType(partType, 'TEXT')) {
-                    return String(part?.text || '');
-                }
-                if (isPartType(partType, 'REASONING')) {
-                    const reasoning = String(part?.reasoning || '').trim();
-                    return reasoning ? `[深度思考]\n${reasoning}\n[/深度思考]` : '';
-                }
-                if (isPartType(partType, 'IMAGE')) {
-                    const url = String(part?.url || '').trim();
-                    return url ? `![image](${url})` : '';
-                }
-                if (isPartType(partType, 'TOOL_CALL')) {
-                    const toolName = String(part?.toolName || 'tool');
-                    const args = String(part?.arguments || '').trim();
-                    return args
-                        ? `[工具调用] ${toolName}\n${args}\n[/工具调用]`
-                        : `[工具调用] ${toolName}\n[/工具调用]`;
-                }
-                if (isPartType(partType, 'TOOL')) {
-                    const toolName = String(part?.toolName || 'tool');
-                    // v2 格式用 input，旧格式用 arguments
-                    const args = String(part?.input || part?.arguments || '').trim();
-                    const output = stringifyToolPayload(part?.output).trim();
-                    const callText = args
-                        ? `[工具调用] ${toolName}\n${args}\n[/工具调用]`
-                        : `[工具调用] ${toolName}\n[/工具调用]`;
-                    return output
-                        ? `${callText}\n\n[工具结果] ${toolName}\n${output}\n[/工具结果]`
-                        : callText;
-                }
-                if (isPartType(partType, 'TOOL_RESULT')) {
-                    const toolName = String(part?.toolName || 'tool');
-                    const output = stringifyToolPayload(part?.output ?? part?.result ?? part?.content).trim();
-                    return output
-                        ? `[工具结果] ${toolName}\n${output}\n[/工具结果]`
-                        : `[工具结果] ${toolName}\n[/工具结果]`;
-                }
-                return '';
-            }).filter(Boolean).join('\n\n').trim();
-        }
-
-        function ensureYourAIScrollConversationEditable(conversation) {
-            if (!conversation || !Array.isArray(conversation._rawMessages)) return;
-
-            if (!Array.isArray(conversation.messages) || conversation.messages.length === 0) {
-                const baseMs = normalizeTimestampToMs(conversation.create_at) || Date.now();
-                conversation.messages = conversation._rawMessages.map((msg, index) => {
-                    const content = extractTextFromRikkaParts(msg?.parts);
-                    const fallbackMs = baseMs + (index * 1000);
+            let nodes;
+            // 检测返回格式：节点数组 vs 扁平消息数组
+            if (previewData.length > 0 && previewData[0].nodeIndex !== undefined) {
+                // 分支节点格式（DeepSeek）：{nodeIndex, messages:[...], selectIndex}
+                nodes = previewData.map(function(entry) {
                     return {
-                        role: normalizeMessageRole(msg?.role) || 'assistant',
-                        content: content,
-                        timestamp: normalizeIsoString(msg?.createdAt, fallbackMs),
-                        selected: true
+                        nodeIndex: entry.nodeIndex,
+                        messages: entry.messages.map(function(m) {
+                            var parts = extractPartsForEditor(m.parts || []);
+                            return {
+                                role: m.role || 'assistant',
+                                parts: parts,
+                                content: flattenPartsToText(parts),
+                                timestamp: m.createdAt || null
+                            };
+                        }),
+                        selectedVariant: 0
+                    };
+                });
+            } else {
+                // 扁平消息格式（其他来源）：每条消息包装为独立节点
+                nodes = previewData.map(function(m, i) {
+                    return {
+                        nodeIndex: i,
+                        messages: [{
+                            role: m.role || 'assistant',
+                            content: m.content || '',
+                            timestamp: m.timestamp || null
+                        }],
+                        selectedVariant: 0
                     };
                 });
             }
 
-            if (!conversation.original_data || typeof conversation.original_data !== 'object') {
-                const baseMs = normalizeTimestampToMs(conversation.create_at) || Date.now();
-                conversation.original_data = { timestamp: new Date(baseMs).toISOString() };
-            }
-        }
-
-        function buildWorkspaceEditableMessages(binding) {
-            if (!binding) return [];
-            const { item, conversation } = binding;
-            const baseMs = item?.createdAtMs || Date.now();
-            const sourceType = item?.dataSource || currentDataSource;
-
-            if (Array.isArray(conversation?._editedMessages) && conversation._editedMessages.length > 0) {
-                return conversation._editedMessages.map((msg, index) => normalizePreviewMessage(msg, baseMs + (index * 1000)));
-            }
-
-            try {
-                if (sourceType === 'chatgpt') {
-                    const mapping = conversation?.mapping || {};
-                    const currentNode = conversation?.current_node;
-                    const rikkahubMessages = extractMessages(mapping, currentNode, null, null);
-                    const previewMessages = toPreviewMessageObjectsFromRikkaMessages(rikkahubMessages, baseMs);
-                    return previewMessages.map((msg, index) => normalizePreviewMessage(msg, baseMs + (index * 1000)));
-                }
-
-                if (sourceType === 'deepseek' && item?.bucket === 'sourceData') {
-                    const mapping = conversation?.mapping || {};
-                    const rikkahubMessages = extractDeepSeekMessages(mapping, null);
-                    const previewMessages = toPreviewMessageObjectsFromRikkaMessages(rikkahubMessages, baseMs);
-                    return previewMessages.map((msg, index) => normalizePreviewMessage(msg, baseMs + (index * 1000)));
-                }
-
-                if (sourceType === 'deepseek' && item?.bucket === 'secondSourceData') {
-                    const sourceMessages = Array.isArray(conversation?.messages) ? conversation.messages : [];
-                    return sourceMessages.map((msg, index) => normalizePreviewMessage({
-                        role: normalizeMessageRole(msg?.role) || 'assistant',
-                        content: String(msg?.content || ''),
-                        timestamp: msg?.time || msg?.timestamp
-                    }, baseMs + (index * 1000))).filter(msg => String(msg.content || '').trim());
-                }
-
-                if (sourceType === 'youraiscroll' || sourceType === 'qwen') {
-                    ensureYourAIScrollConversationEditable(conversation);
-                    return buildPreviewEditableMessages(conversation);
-                }
-
-                if (sourceType === 'grok') {
-                    ensureYourAIScrollConversationEditable(conversation);
-                    return buildPreviewEditableMessages(conversation);
-                }
-            } catch (error) {
-                console.warn('buildWorkspaceEditableMessages failed:', error);
-            }
-
-            return [];
-        }
-
-        function buildWorkspaceEditableConversation(binding) {
-            const { item, conversation } = binding;
-            const createMs = item?.createdAtMs || Date.now();
-            const updateMs = item?.updatedAtMs || createMs;
-            const sourceType = item?.dataSource || currentDataSource;
-            const platform = (sourceType === 'youraiscroll' || sourceType === 'qwen' || sourceType === 'grok')
-                ? (conversation?.platform || 'unknown')
-                : sourceType;
-            const assistantName = getPlatformName(platform) || item?.sourceLabel || 'AI Assistant';
-
-            return {
-                id: conversation?.id || item?.normalizedConvId || generateUUID(),
-                title: item?.title || conversation?.title || 'Untitled',
-                create_at: Math.floor(createMs / 1000),
-                update_at: Math.floor(updateMs / 1000),
-                user_id: conversation?.user_id || generateUUID(),
-                user_name: conversation?.user_name || 'User',
-                assistant_id: conversation?.assistant_id || generateUUID(),
-                assistant_name: conversation?.assistant_name || assistantName,
-                platform: platform,
-                original_data: conversation?.original_data || null,
-                messages: buildWorkspaceEditableMessages(binding),
-                __workspaceMode: true,
-                __workspaceId: item?.id || null,
-                __sourceType: sourceType
+            editorState = {
+                workspaceId: workspaceId,
+                nodes: nodes,
+                originalItem: item,
+                originalConversation: conv
             };
+
+            // 顶栏
+            document.getElementById('editorTitle').textContent = item.title;
+            document.getElementById('editorMeta').innerHTML = `
+                <span class="ws-card-badge">${escapeWorkspaceHtml(item.sourceLabel)}</span>
+                ${item.messageCount} 条消息
+            `;
+
+            renderEditorMessages();
+            document.getElementById('workspaceEditorPage').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
-        function openWorkspaceConversationEditor(workspaceId) {
-            closeWorkspacePreviewModal();
-            const binding = getWorkspaceConversationBinding(workspaceId);
-            if (!binding) {
-                showError(t('error.conversationNotFound'));
+        function closeWorkspaceEditor() {
+            document.getElementById('workspaceEditorPage').classList.remove('active');
+            // 如果工作台弹窗仍打开，保持 body 滚动锁定
+            const wsModal = document.getElementById('modalWorkspace');
+            if (wsModal && wsModal.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // ===== 渲染编辑器消息 =====
+        function renderEditorMessages() {
+            const container = document.getElementById('editorMessages');
+            if (!container) return;
+
+            const nodes = editorState.nodes || [];
+            if (nodes.length === 0) {
+                container.innerHTML = '<div class="editor-empty">暂无消息</div>';
                 return;
             }
 
-            const editableConversation = buildWorkspaceEditableConversation(binding);
-            openPreviewEditModal(editableConversation, {
-                mode: 'workspace',
-                messageOnly: true,
-                sourceType: binding.item?.dataSource || currentDataSource
+            var html = '';
+            for (var ni = 0; ni < nodes.length; ni++) {
+                var node = nodes[ni];
+                var selIdx = node.selectedVariant || 0;
+                var msg = node.messages[selIdx] || {};
+                var role = (msg.role || 'assistant').toLowerCase();
+                var variantCount = node.messages.length;
+                var hasVariants = variantCount > 1;
+                var parts = msg.parts || [];
+                var hasNoParts = parts.length === 0;
+
+                html += '<div class="emsg-node' + (hasVariants ? ' has-variants' : '') + '" data-nodeidx="' + ni + '">';
+
+                // 变体切换器
+                if (hasVariants) {
+                    html += '<div class="emsg-variant-bar">';
+                    html += '<button class="emsg-variant-btn" onclick="event.stopPropagation(); switchNodeVariant(' + ni + ', -1)">◀</button>';
+                    html += '<span class="emsg-variant-label">' + (selIdx + 1) + ' / ' + variantCount + '</span>';
+                    html += '<button class="emsg-variant-btn" onclick="event.stopPropagation(); switchNodeVariant(' + ni + ', 1)">▶</button>';
+                    html += '</div>';
+                }
+
+                // 用户消息：气泡样式（仅预览）
+                if (role === 'user') {
+                    html += '<div class="emsg user">';
+                    html += '<div class="emsg-avatar">🙋</div>';
+                    html += '<div class="emsg-body">';
+                    html += '<div class="emsg-content">' + escapeWorkspaceHtml(msg.content || (parts.length > 0 ? parts[0].content : '')) + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                } else if (hasNoParts) {
+                    // 无 parts 的旧消息：保留原渲染（仅预览）
+                    html += '<div class="emsg ' + role + '">';
+                    html += '<div class="emsg-avatar">🤖</div>';
+                    html += '<div class="emsg-body">';
+                    html += '<div class="emsg-content">' + escapeWorkspaceHtml(msg.content || '') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                } else {
+                    // 助手消息有 parts：卡片式渲染（编辑过则用 content）
+                    html += '<div class="emsg assistant">';
+                    html += '<div class="emsg-avatar">🤖</div>';
+                    html += '<div class="emsg-body" style="background:none;padding:0;min-width:0;">';
+
+                    if (msg._edited) {
+                        // 已编辑：直接用 content 文本渲染
+                        html += '<div class="epart epart-text">';
+                        html += '<div class="emsg-content" style="margin:0">' + escapeWorkspaceHtml(msg.content || '') + '</div>';
+                        html += '</div>';
+                    } else {
+                        // 将 reasoning/tool 分组为一个 ChainOfThought 卡片，text 单独渲染
+                        for (var pi = 0; pi < parts.length; ) {
+                            var part = parts[pi];
+                            if (part.type === 'text') {
+                                html += '<div class="epart epart-text">';
+                                html += '<div class="emsg-content" style="margin:0">' + escapeWorkspaceHtml(part.content || '') + '</div>';
+                                html += '</div>';
+                                pi++;
+                            } else {
+                                // 收集连续的 reasoning + tool parts
+                                var cotStart = pi;
+                                while (pi < parts.length && (parts[pi].type === 'reasoning' || parts[pi].type === 'tool')) {
+                                    pi++;
+                                }
+                                var cotParts = parts.slice(cotStart, pi);
+                                var cotId = 'cot-' + ni + '-' + cotStart;
+                                var stepCount = cotParts.length;
+                                var firstLabel = '';
+                                for (var ci = 0; ci < cotParts.length; ci++) {
+                                    if (cotParts[ci].type === 'reasoning') { firstLabel = '💡 深度思考'; break; }
+                                    if (cotParts[ci].type === 'tool') { firstLabel = getToolIcon(cotParts[ci].toolName) + ' ' + escapeWorkspaceHtml(cotParts[ci].toolName); break; }
+                                }
+
+                                html += '<div class="epart-cot">';
+                                // 折叠控制栏
+                                html += '<div class="epart-cot-head" onclick="event.stopPropagation();var b=this.parentElement.querySelector(\'.epart-cot-body\');var t=this.querySelector(\'.epart-cot-toggle\');b.style.display=b.style.display===\'none\'?\'\':\'none\';t.textContent=b.style.display===\'none\'?\'展开\':\'收起\'">';
+                                html += '<span>' + firstLabel + '</span>';
+                                html += '<span class="epart-cot-count">' + stepCount + ' 步</span>';
+                                html += '<span class="epart-cot-toggle epart-toggle">展开</span>';
+                                html += '</div>';
+                                // 折叠内容
+                                html += '<div class="epart-cot-body" style="display:none">';
+                                for (var ci = 0; ci < cotParts.length; ci++) {
+                                    var cp = cotParts[ci];
+                                    var stepId = cotId + '-s' + ci;
+                                    if (cp.type === 'reasoning') {
+                                        html += '<div class="epart epart-reasoning">';
+                                        html += '<div class="epart-head" onclick="event.stopPropagation();var b=this.parentElement.querySelector(\'.epart-body\');var t=this.querySelector(\'.epart-toggle\');b.style.display=b.style.display===\'none\'?\'\':\'none\';t.textContent=b.style.display===\'none\'?\'展开\':\'收起\'">';
+                                        html += '<span class="epart-icon">💡</span>';
+                                        html += '<span class="epart-label">深度思考</span>';
+                                        html += '<span class="epart-toggle">展开</span>';
+                                        html += '</div>';
+                                        html += '<div class="epart-body" style="display:none">' + escapeWorkspaceHtml(cp.content || '') + '</div>';
+                                        html += '</div>';
+                                    } else if (cp.type === 'tool') {
+                                        var tn = cp.toolName || 'TOOL';
+                                        // 有 output 就能展开
+                                        var hasAnyOutput = !!(cp.preview || cp.outputPreview);
+                                        html += '<div class="epart epart-tool' + (hasAnyOutput ? ' has-detail' : '') + '">';
+                                        html += '<div class="epart-head">';
+                                        html += '<span class="epart-icon">' + getToolIcon(tn) + '</span>';
+                                        html += '<span class="epart-label">' + escapeWorkspaceHtml(tn) + '</span>';
+                                        if (hasAnyOutput) {
+                                            html += '<span class="epart-toggle" onclick="event.stopPropagation();var b=this.parentElement.parentElement.querySelector(\'.epart-tool-detail\');if(b){var t=this;b.style.display=b.style.display===\'none\'?\'\':\'none\';t.textContent=b.style.display===\'none\'?\'展开\':\'收起\'}">展开</span>';
+                                        }
+                                        html += '</div>';
+                                        if (cp.preview || cp.outputPreview) {
+                                            html += '<div class="epart-tool-detail" style="display:none">';
+                                            if (cp.preview) {
+                                                html += '<div class="epart-tool-query">' + escapeWorkspaceHtml(cp.preview) + '</div>';
+                                            }
+                                            if (cp.outputPreview) {
+                                                html += '<div class="epart-tool-output">' + escapeWorkspaceHtml(cp.outputPreview) + '</div>';
+                                            }
+                                            html += '</div>';
+                                        }
+                                        html += '</div>';
+                                    }
+                                }
+                                html += '</div>'; // .epart-cot-body
+                                html += '</div>'; // .epart-cot
+                            }
+                        }
+                    }
+
+                    html += '</div>';
+                    html += '</div>';
+                }
+
+                html += '</div>'; // .emsg-node
+            }
+            container.innerHTML = html;
+        }
+
+        // ===== 变体切换 =====
+        function switchNodeVariant(nodeIdx, direction) {
+            var node = (editorState.nodes || [])[nodeIdx];
+            if (!node || node.messages.length <= 1) return;
+            var newIdx = (node.selectedVariant || 0) + direction;
+            if (newIdx < 0) newIdx = node.messages.length - 1;
+            if (newIdx >= node.messages.length) newIdx = 0;
+            node.selectedVariant = newIdx;
+            renderEditorMessages();
+        }
+
+        // ===== 消息编辑 =====
+        function openMessageEditor(nodeIdx) {
+            var node = (editorState.nodes || [])[nodeIdx];
+            if (!node) return;
+            var selIdx = node.selectedVariant || 0;
+            var msg = node.messages[selIdx] || {};
+
+            // 用原始 content 或从 parts 重建文本
+            var editContent = msg.content || flattenPartsToText(msg.parts || []);
+
+            const overlay = document.createElement('div');
+            overlay.className = 'emsg-edit-overlay active';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+            var roleSel = msg.role || 'assistant';
+            overlay.innerHTML = `
+                <div class="emsg-edit-card" onclick="event.stopPropagation()">
+                    <label>角色</label>
+                    <select id="msgEditRole">
+                        <option value="user" ${roleSel === 'user' ? 'selected' : ''}>🙋 User</option>
+                        <option value="assistant" ${roleSel === 'assistant' ? 'selected' : ''}>🤖 Assistant</option>
+                        <option value="system" ${roleSel === 'system' ? 'selected' : ''}>⚙ System</option>
+                        <option value="tool" ${roleSel === 'tool' ? 'selected' : ''}>🔧 Tool</option>
+                    </select>
+                    <label>时间</label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="datetime-local" id="msgEditTime" value="${toDatetimeLocalValue(msg.timestamp)}" style="flex:1;">
+                        <button type="button" class="emsg-edit-now-btn" onclick="var d=new Date();var tz=d.getTimezoneOffset();d=new Date(d.getTime()-tz*60000);document.getElementById('msgEditTime').value=d.toISOString().slice(0,16);">现在</button>
+                    </div>
+                    <label>内容 <button type="button" class="emsg-expand-btn" onclick="event.stopPropagation();openFullscreenMessageEditor()">⛶ 展开</button></label>
+                    <textarea id="msgEditContent">${escapeWorkspaceHtml(editContent)}</textarea>
+                    <div class="emsg-edit-actions">
+                        <button class="btn-text" onclick="this.closest('.emsg-edit-overlay').remove()">取消</button>
+                        <button class="btn-primary" onclick="saveMessageEdit(${nodeIdx}, this.closest('.emsg-edit-overlay'))">保存</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        // 全屏展开编辑器（参考 RikkaHub 的 FullScreenEditor 模式）
+        function openFullscreenMessageEditor() {
+            var curTextarea = document.getElementById('msgEditContent');
+            if (!curTextarea) return;
+            var currentText = curTextarea.value;
+
+            var overlay = document.createElement('div');
+            overlay.className = 'emsg-fullscreen-overlay';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+            overlay.innerHTML = ''
+                + '<div class="emsg-fullscreen-card" onclick="event.stopPropagation()">'
+                +   '<div class="emsg-fullscreen-head">'
+                +     '<span style="font-size:14px;font-weight:600;">编辑消息</span>'
+                +     '<button class="emsg-expand-close" onclick="this.closest(\'.emsg-fullscreen-overlay\').remove()">✕</button>'
+                +   '</div>'
+                +   '<textarea class="emsg-fullscreen-textarea" id="msgFullscreenContent">' + escapeWorkspaceHtml(currentText) + '</textarea>'
+                +   '<div style="display:flex;justify-content:flex-end;gap:8px;padding:8px 0 0;">'
+                +     '<button class="btn-text" onclick="this.closest(\'.emsg-fullscreen-overlay\').remove()">取消</button>'
+                +     '<button class="btn-primary" onclick="var fs=document.getElementById(\'msgFullscreenContent\');var et=document.getElementById(\'msgEditContent\');if(et&&fs)et.value=fs.value;this.closest(\'.emsg-fullscreen-overlay\').remove();">完成</button>'
+                +   '</div>'
+                + '</div>';
+            document.body.appendChild(overlay);
+        }
+
+        function saveMessageEdit(nodeIdx, overlay) {
+            var node = (editorState.nodes || [])[nodeIdx];
+            if (!node) { overlay.remove(); return; }
+            var selIdx = node.selectedVariant || 0;
+            var oldMsg = node.messages[selIdx] || {};
+            var newRole = document.getElementById('msgEditRole').value;
+            var newTime = document.getElementById('msgEditTime').value;
+            var newContent = document.getElementById('msgEditContent').value;
+
+            // 保留原始 parts 结构，标记已编辑使渲染器优先用 content
+            node.messages[selIdx] = {
+                role: newRole,
+                parts: oldMsg.parts || [],
+                content: newContent,
+                _edited: true,
+                timestamp: newTime ? (newTime + ':00') : (oldMsg.timestamp || null)
+            };
+            overlay.remove();
+            renderEditorMessages();
+        }
+
+        function deleteEditorNode(nodeIdx) {
+            showConfirmBar('确定要删除这条消息吗？').then(function(confirmed) {
+                if (confirmed) {
+                    (editorState.nodes || []).splice(nodeIdx, 1);
+                    renderEditorMessages();
+                }
             });
         }
 
-        function closeWorkspaceConversationModal() {
-            const modal = document.getElementById('workspaceConversationModal');
-            if (modal) {
-                modal.classList.remove('active');
+        function addEditorMessage() {
+            var nodes = editorState.nodes || [];
+            var prevRole = 'assistant';
+            if (nodes.length > 0) {
+                var lastNode = nodes[nodes.length - 1];
+                var lastMsg = lastNode.messages[lastNode.selectedVariant || 0];
+                prevRole = (lastMsg && lastMsg.role === 'user') ? 'assistant' : 'user';
             }
-            workspaceEditContext = null;
+            nodes.push({
+                nodeIndex: nodes.length,
+                messages: [{ role: prevRole, parts: [{ type: 'text', content: '' }], content: '', timestamp: new Date().toISOString() }],
+                selectedVariant: 0
+            });
+            renderEditorMessages();
+            setTimeout(function() { openMessageEditor(nodes.length - 1); }, 100);
         }
 
-        function saveWorkspaceConversationEdit() {
-            if (!workspaceEditContext) return;
+        // ===== 保存编辑器更改 =====
+        function saveWorkspaceEditor() {
+            var nodes = editorState.nodes || [];
+            var workspaceId = editorState.workspaceId;
+            var originalItem = editorState.originalItem;
+            var originalConversation = editorState.originalConversation;
+            if (!workspaceId || !originalItem) return;
 
-            const { item, conversation } = workspaceEditContext;
-            const titleInput = document.getElementById('workspaceEditTitleInput');
-            const createInput = document.getElementById('workspaceEditCreateInput');
-            const updateInput = document.getElementById('workspaceEditUpdateInput');
-            const selectedInput = document.getElementById('workspaceEditSelectedInput');
+            const binding = getWorkspaceConversationBinding(workspaceId);
+            if (!binding) { showError('未找到对话数据'); return; }
 
-            const title = (titleInput?.value || '').trim() || 'Untitled';
-            const fallbackCreateMs = item.createdAtMs || Date.now();
-            const fallbackUpdateMs = item.updatedAtMs || fallbackCreateMs;
-            const createMs = parseDateTimeInputToMs(createInput?.value, fallbackCreateMs);
-            const updateMs = parseDateTimeInputToMs(updateInput?.value, Math.max(createMs, fallbackUpdateMs));
-            const selected = !!selectedInput?.checked;
-            const sourceType = item?.dataSource || currentDataSource;
+            const conversation = binding.conversation;
 
-            conversation.title = title;
-
-            if (sourceType === 'chatgpt') {
-                conversation.create_time = Math.floor(createMs / 1000);
-                conversation.update_time = Math.floor(updateMs / 1000);
-            } else if (sourceType === 'deepseek') {
-                if (item.bucket === 'sourceData') {
-                    conversation.inserted_at = new Date(createMs).toISOString();
-                    conversation.updated_at = new Date(updateMs).toISOString();
-                } else {
-                    conversation.created_at = createMs;
-                    conversation.updated_at = updateMs;
+            // 从节点模型中提取扁平消息用于保存
+            var flatMessages = [];
+            for (var ni = 0; ni < nodes.length; ni++) {
+                var msg = nodes[ni].messages[nodes[ni].selectedVariant || 0];
+                if (msg && (msg.content || '').trim()) {
+                    flatMessages.push(msg);
                 }
-            } else if (sourceType === 'youraiscroll' || sourceType === 'qwen' || sourceType === 'grok') {
-                conversation.create_at = Math.floor(createMs / 1000);
-                conversation.update_at = Math.floor(updateMs / 1000);
             }
 
-            item.title = title;
-            item.createdAtMs = createMs;
-            item.updatedAtMs = updateMs;
-            item.selected = selected;
+            if (conversation) {
+                const sourceType = originalItem.dataSource;
+                const itemInStore = (workspaceStore.conversations || []).find(function(c) { return c.id === workspaceId; });
 
-            closeWorkspaceConversationModal();
+                if (conversation._editedMessages !== undefined || flatMessages.length > 0) {
+                    conversation._editedMessages = flatMessages;
+                }
+                // 保存分支节点结构（DeepSeek 用）
+                if (nodes.length > 0 && nodes.some(function(n) { return n.messages.length > 1; })) {
+                    conversation._editedMessageNodes = nodes;
+                }
+
+                // 更新标题（取第一条用户消息前面部分）
+                if (flatMessages.length > 0 && itemInStore) {
+                    var firstUserMsg = null;
+                    for (var fi = 0; fi < flatMessages.length; fi++) {
+                        if (flatMessages[fi].role === 'user') { firstUserMsg = flatMessages[fi]; break; }
+                    }
+                    if (firstUserMsg && firstUserMsg.content) {
+                        var newTitle = firstUserMsg.content.slice(0, 40).replace(/\n/g, ' ');
+                        itemInStore.title = newTitle || itemInStore.title;
+                    }
+                    itemInStore.messageCount = flatMessages.length;
+                    itemInStore.selected = true;
+                }
+            }
+
+            closeWorkspaceEditor();
             renderWorkspaceList();
-            checkReady();
-            showInfo(t('info.conversationUpdated'));
+            showInfo('对话已保存');
+        }
+
+        // ===== 删除对话 =====
+        function deleteWorkspaceConversation() {
+            const { workspaceId, originalItem } = editorState;
+            if (!workspaceId || !originalItem) return;
+
+            showConfirmBar('确定要删除这个对话吗？此操作可在保存前撤销。').then(confirmed => {
+                if (confirmed) {
+                    const idx = (workspaceStore.conversations || []).findIndex(c => c.id === workspaceId);
+                    if (idx >= 0) {
+                        workspaceStore.conversations.splice(idx, 1);
+                    }
+                    closeWorkspaceEditor();
+                    renderWorkspaceList();
+                    showInfo('对话已移除');
+                }
+            });
+        }
+
+        // ===== 获取对话预览消息（从各来源解析）=====
+        function getWorkspaceConversationPreviewMessages(workspaceId) {
+            const binding = getWorkspaceConversationBinding(workspaceId);
+            if (!binding) return [];
+
+            const { conversation, item } = binding;
+            if (!conversation || !item) return [];
+
+            if (Array.isArray(conversation._editedMessages) && conversation._editedMessages.length > 0) {
+                return conversation._editedMessages.map(m => ({ role: m.role || 'user', content: m.content || '', timestamp: m.timestamp }));
+            }
+
+            switch (item.dataSource) {
+                case 'chatgpt': {
+                    const mapping = conversation.mapping;
+                    if (!mapping) return [];
+                    const msgs = [];
+                    let nodeId = conversation.current_node;
+                    while (nodeId && mapping[nodeId]) {
+                        const node = mapping[nodeId];
+                        const msg = node.message;
+                        if (msg && msg.content) {
+                            const parts = msg.content.parts || [];
+                            const text = parts.filter(p => typeof p === 'string').join('\n');
+                            if (text.trim()) {
+                                msgs.unshift({
+                                    role: (msg.author && msg.author.role) || 'assistant',
+                                    content: text,
+                                    timestamp: msg.create_time ? new Date(msg.create_time * 1000).toISOString() : null
+                                });
+                            }
+                        }
+                        nodeId = node.parent;
+                    }
+                    return msgs;
+                }
+                case 'deepseek': {
+                    const mapping = conversation.mapping;
+                    if (!mapping) return [];
+                    return extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
+                }
+                case 'grok': {
+                    const text = conversation.text || '';
+                    return text.trim() ? [{ role: 'assistant', content: text }] : [];
+                }
+                case 'youraiscroll': {
+                    var ymsgs = Array.isArray(conversation.messages) ? conversation.messages : [];
+                    var yresult = [];
+                    for (var yi = 0; yi < ymsgs.length; yi++) {
+                        yresult.push({ role: ymsgs[yi].role || 'user', content: ymsgs[yi].content || '', timestamp: ymsgs[yi].timestamp });
+                    }
+                    return yresult;
+                }
+                case 'qwen': {
+                    var qmsgs = Array.isArray(conversation.messages) ? conversation.messages : [];
+                    var qresult = [];
+                    for (var qi = 0; qi < qmsgs.length; qi++) {
+                        qresult.push({ role: qmsgs[qi].role || 'user', content: qmsgs[qi].content || '', timestamp: qmsgs[qi].timestamp });
+                    }
+                    return qresult;
+                }
+                default:
+                    return [];
+            }
+        }
+
+        function getWorkspaceConversationBinding(workspaceId) {
+            var conversations = workspaceStore && workspaceStore.conversations ? workspaceStore.conversations : [];
+            var item = null;
+            for (var ci = 0; ci < conversations.length; ci++) {
+                if (conversations[ci].id === workspaceId) { item = conversations[ci]; break; }
+            }
+            if (!item) return null;
+
+            const bucket = ensureSourcePoolBucket(item.dataSource);
+            if (!bucket) return null;
+            const sourceArr = (item.bucket === 'secondSourceData' || item.dataSource === 'deepseek' && item.bucket === 'secondSourceData')
+                ? (bucket.secondSourceData || [])
+                : (Array.isArray(bucket.sourceData) ? bucket.sourceData : []);
+            const conversation = sourceArr[item.rawIndex];
+            if (!conversation) return null;
+
+            return { conversation, item, bucket, rawIndex: item.rawIndex };
         }
 
         function getMergeDataByWorkspaceSelection() {
-            const workspaceHasItems = Array.isArray(workspaceStore?.conversations) && workspaceStore.conversations.length > 0;
+            var conversations = workspaceStore && workspaceStore.conversations;
+            var workspaceHasItems = Array.isArray(conversations) && conversations.length > 0;
             if (!workspaceHasItems) {
                 const fallbackBySource = {
                     chatgpt: { sourceData: [], secondSourceData: [] },
@@ -6689,20 +6709,21 @@
                 };
             }
 
-            const selectedItems = Array.isArray(workspaceStore?.conversations)
-                ? workspaceStore.conversations.filter(item => item.selected !== false)
+            var selectedItems = conversations
+                ? conversations.filter(function(item) { return item.selected !== false; })
                 : [];
 
-            const selectedBindings = selectedItems
-                .map(item => {
-                    const binding = getWorkspaceConversationBinding(item.id);
-                    if (!binding) return null;
-                    return {
+            var selectedBindings = [];
+            for (var si = 0; si < selectedItems.length; si++) {
+                var item = selectedItems[si];
+                var binding = getWorkspaceConversationBinding(item.id);
+                if (binding) {
+                    selectedBindings.push({
                         item: binding.item,
                         conversation: binding.conversation
-                    };
-                })
-                .filter(Boolean);
+                    });
+                }
+            }
 
             const bySource = {
                 chatgpt: { sourceData: [], secondSourceData: [] },
@@ -6733,7 +6754,7 @@
         }
 
         function getSelectedConversationCountForCurrentSource() {
-            const mergeDataSelection = getMergeDataByWorkspaceSelection();
+            var mergeDataSelection = getMergeDataByWorkspaceSelection();
             return mergeDataSelection.selectedCount || 0;
         }
 
@@ -7041,6 +7062,28 @@
             if (modal) {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';  // 恢复背景滚动
+            }
+        }
+
+        // 对话工作台弹窗
+        function openWorkspaceModal() {
+            const modal = document.getElementById('modalWorkspace');
+            if (modal) {
+                renderWorkspaceList();  // 确保内容最新
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function closeWorkspaceModal(event) {
+            if (event.target === event.currentTarget) {
+                closeWorkspaceModalDirect();
+            }
+        }
+        function closeWorkspaceModalDirect() {
+            const modal = document.getElementById('modalWorkspace');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
             }
         }
 
@@ -7416,8 +7459,8 @@
             const released = releaseLargeCachesBeforeDownload(riskInfo);
             if (released.length > 0) {
                 showInfo(currentLanguage === 'en-US'
-                    ? `${released.join(', ')}. Starting download...`
-                    : `${released.join('，')}，正在启动下载...`);
+                    ? 'Releasing caches, starting download...'
+                    : '释放缓存中，即将开始下载...');
                 await new Promise(resolve => setTimeout(resolve, 120));
             }
 
@@ -7539,10 +7582,11 @@
                 warning: '⚠️'
             };
 
+            const titleHtml = title ? `<div class="toast-title">${title}</div>` : '';
             toast.innerHTML = `
                 <span class="toast-icon">${iconMap[type] || iconMap.info}</span>
                 <div class="toast-content">
-                    <div class="toast-title">${title}</div>
+                    ${titleHtml}
                     <div class="toast-message">${message}</div>
                 </div>
                 <button class="toast-close" onclick="dismissToast(this)">×</button>
@@ -7550,7 +7594,6 @@
 
             container.appendChild(toast);
 
-            // 自动消失（8秒后）
             setTimeout(() => {
                 dismissToast(toast.querySelector('.toast-close'));
             }, duration);
@@ -7616,12 +7659,10 @@
                 closeModalDirect('usageMore');
                 closeModalDirect('support');
                 closeModalDirect('about');
+                closeWorkspaceModalDirect();
                 closeRikkaHubRequiredModal();
                 closeMergeDownloadModal(true);
-                closeWorkspacePreviewModal();
-                if (workspaceFullscreen) {
-                    setWorkspaceFullscreenState(false);
-                }
+                closeWorkspaceEditor();
             }
         });
 
@@ -11157,9 +11198,12 @@
                                 }
                         
                                 // 删除消息
-                                function deletePreviewMessage(messageIndex) {
+                                async function deletePreviewMessage(messageIndex) {
                                     if (!previewEditMessages[messageIndex]) return;
-                                    if (confirm(currentLanguage === 'en-US' ? 'Delete this message?' : '确定要删除这条消息吗？')) {
+                                    const confirmed = await showConfirmBar(
+                                        currentLanguage === 'en-US' ? 'Delete this message?' : '确定要删除这条消息吗？'
+                                    );
+                                    if (confirmed) {
                                         previewEditMessages.splice(messageIndex, 1);
                                         renderPreviewMessagesList();
                                     }
@@ -12036,11 +12080,12 @@
         }
 
         function checkReady() {
-            const mergeButton = document.getElementById('mergeButton');
-            const sourceReady = hasAnyImportedSourceData();
-            const rikkahubReady = !!rikkahubData;
-            const selectedConversationCount = sourceReady ? getSelectedConversationCountForCurrentSource() : 0;
-            const ready = sourceReady && selectedConversationCount > 0;
+            var mergeButton = document.getElementById('mergeButton');
+            if (!mergeButton) return;
+            var sourceReady = hasAnyImportedSourceData();
+            var rikkahubReady = !!rikkahubData;
+            var selectedConversationCount = sourceReady ? getSelectedConversationCountForCurrentSource() : 0;
+            var ready = sourceReady && selectedConversationCount > 0;
 
             console.log(
                 'checkReady: sourceReady=' + sourceReady +
@@ -12116,15 +12161,15 @@
         }
 
         function showSuccess(message) {
-            showToast(t('toast.success'), message, 'success', 8000);
+            showToast(null, message, 'success', 8000);
         }
 
         function showError(message) {
-            showToast(t('toast.error'), message, 'error', 10000);
+            showToast(null, message, 'error', 10000);
         }
 
         function showInfo(message) {
-            showToast(t('toast.info'), message, 'info', 6000);
+            showToast(null, message, 'info', 6000);
         }
 
         function updateMergeStatus(message) {
@@ -12139,6 +12184,26 @@
         function clearMergeStatus() {
             const bar = document.getElementById('mergeStatusBar');
             if (bar) bar.classList.remove('active');
+        }
+
+        // 底部确认条
+        let pendingConfirmResolver = null;
+        function showConfirmBar(text) {
+            if (typeof pendingConfirmResolver === 'function') {
+                pendingConfirmResolver(false);
+            }
+            return new Promise(resolve => {
+                pendingConfirmResolver = resolve;
+                document.getElementById('confirmBarText').textContent = text;
+                document.getElementById('confirmBar').classList.add('active');
+            });
+        }
+        function dismissConfirmBar(result) {
+            document.getElementById('confirmBar').classList.remove('active');
+            if (typeof pendingConfirmResolver === 'function') {
+                pendingConfirmResolver(result === true);
+                pendingConfirmResolver = null;
+            }
         }
 
         function updateProgress(percent) {
@@ -12344,6 +12409,10 @@
                     // Branch-aware message nodes for regenerated replies → RikkaHub arrow switching
                     if (editedMessages.length === 0 && mapping) {
                         messageNodes = extractDeepSeekBranchMessageNodes(mapping, modelId);
+                    }
+                    // 优先使用工作台编辑器保存的分支节点
+                    if (Array.isArray(conv._editedMessageNodes) && conv._editedMessageNodes.length > 0 && conv._editedMessageNodes.some(function(n) { return n.messages.length > 1; })) {
+                        messageNodes = convertEditableNodesToBranchNodes(conv._editedMessageNodes, modelId);
                     }
                 } else {
                     const sourceConversationId = conv.id || '';
@@ -13141,7 +13210,7 @@
                 }
                 console.error('合并失败:', error);
                 console.error('错误堆栈:', error.stack);
-                showError(t('error.mergeFailed', { message: error.message, detail: error }));
+                showError(t('error.mergeFailed', { message: error.message }));
                 clearMergeStatus();
             } finally {
                 if (mergedDb && !dbClosed) {
@@ -13548,6 +13617,37 @@
          * @param {string} deepseekModelId - Model ID to assign to assistant messages
          * @returns {UIMessage[]} Array of UIMessage objects derived from this node's fragments
          */
+
+        // ===== 将编辑器保存的分支节点转换为合并用的 MessageNodeEntry =====
+        function convertEditableNodesToBranchNodes(editNodes, modelId) {
+            var result = [];
+            for (var ni = 0; ni < editNodes.length; ni++) {
+                var node = editNodes[ni];
+                var messages = [];
+                for (var mi = 0; mi < node.messages.length; mi++) {
+                    var msg = node.messages[mi];
+                    var rikkaMsg = {
+                        id: generateUUID(),
+                        role: msg.role || 'assistant',
+                        parts: [msg.role === 'user' ? createTextPart(msg.content || '') : createTextPart(msg.content || '')],
+                        annotations: [],
+                        createdAt: msg.timestamp || new Date().toISOString(),
+                        finishedAt: null,
+                        modelId: msg.role === 'assistant' ? modelId : null,
+                        usage: null,
+                        translation: null
+                    };
+                    messages.push(rikkaMsg);
+                }
+                result.push({
+                    nodeIndex: ni,
+                    messages: messages,
+                    selectIndex: node.selectedVariant || 0
+                });
+            }
+            return result;
+        }
+
         function extractMessagesFromDeepSeekNode(nodeData, deepseekModelId) {
             const messages = [];
             const message = nodeData && nodeData.message;
@@ -13785,8 +13885,96 @@
                     var lastNode = mapping[lastChildId];
                     if (lastNode) {
                         var grandChildren = Array.isArray(lastNode.children) ? lastNode.children : [];
-                        for (var gi = 0; gi < grandChildren.length; gi++) {
-                            walkNode(grandChildren[gi], branchId);
+                        
+                        // 🔀 检测 REQUEST 兄弟节点 = 编辑后的用户消息变体（如"好的"→"不错"）
+                        // 将它们收集到同一个 message_node，对齐 RikkaHub 的扁平变体模型
+                        if (grandChildren.length > 1) {
+                            var allRequest = true;
+                            for (var gci = 0; gci < grandChildren.length; gci++) {
+                                var gcn = mapping[grandChildren[gci]];
+                                var gcnMsgs = gcn ? extractMessagesFromDeepSeekNode(gcn, deepseekModelId) : [];
+                                var hasUser = false;
+                                for (var gm = 0; gm < gcnMsgs.length; gm++) {
+                                    if (gcnMsgs[gm].role === 'user') { hasUser = true; break; }
+                                }
+                                if (!hasUser) { allRequest = false; break; }
+                            }
+                            
+                            if (allRequest) {
+                                // 收集所有 REQUEST 变体到同一个 user message_node
+                                var requestVariants = [];
+                                var allAssistants = [];
+                                for (var gci = 0; gci < grandChildren.length; gci++) {
+                                    var gcn = mapping[grandChildren[gci]];
+                                    if (!gcn) continue;
+                                    var gcnMsgs = extractMessagesFromDeepSeekNode(gcn, deepseekModelId);
+                                    for (var gm = 0; gm < gcnMsgs.length; gm++) {
+                                        if (gcnMsgs[gm].role === 'user') {
+                                            requestVariants.push(gcnMsgs[gm]);
+                                        }
+                                    }
+                                    visitedNodeIds.add(grandChildren[gci]);
+                                    traversedCount++;
+                                    
+                                    // 收集该 REQUEST 变体下的所有 assistant 回复
+                                    var gcChildren = Array.isArray(gcn.children) ? gcn.children : [];
+                                    for (var gcci = 0; gcci < gcChildren.length; gcci++) {
+                                        var gcc = mapping[gcChildren[gcci]];
+                                        if (!gcc) continue;
+                                        var gccMsgs = extractMessagesFromDeepSeekNode(gcc, deepseekModelId);
+                                        for (var gccm = 0; gccm < gccMsgs.length; gccm++) {
+                                            if (gccMsgs[gccm].role === 'assistant') {
+                                                allAssistants.push(gccMsgs[gccm]);
+                                            }
+                                        }
+                                        visitedNodeIds.add(gcChildren[gcci]);
+                                        traversedCount++;
+                                    }
+                                }
+                                
+                                if (requestVariants.length > 0) {
+                                    result.push({
+                                        nodeIndex: nodeIndexCounter++,
+                                        messages: requestVariants,
+                                        selectIndex: 0
+                                    });
+                                }
+                                if (allAssistants.length > 0) {
+                                    result.push({
+                                        nodeIndex: nodeIndexCounter++,
+                                        messages: allAssistants,
+                                        selectIndex: 0
+                                    });
+                                }
+                                
+                                // 扫描所有 REQUEST 变体，找到有后续对话的路径继续遍历
+                                // 优先从最后面的变体（用户最近操作的）找，没有则向前回溯
+                                var continuationFound = false;
+                                for (var gci = grandChildren.length - 1; gci >= 0 && !continuationFound; gci--) {
+                                    var reqChild = mapping[grandChildren[gci]];
+                                    if (!reqChild) continue;
+                                    var reqGrandChildren = Array.isArray(reqChild.children) ? reqChild.children : [];
+                                    for (var rgi = reqGrandChildren.length - 1; rgi >= 0 && !continuationFound; rgi--) {
+                                        var asstChild = mapping[reqGrandChildren[rgi]];
+                                        if (!asstChild) continue;
+                                        var nextGen = Array.isArray(asstChild.children) ? asstChild.children : [];
+                                        if (nextGen.length > 0) {
+                                            for (var ngi = 0; ngi < nextGen.length; ngi++) {
+                                                walkNode(nextGen[ngi], branchId);
+                                            }
+                                            continuationFound = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var gi = 0; gi < grandChildren.length; gi++) {
+                                    walkNode(grandChildren[gi], branchId);
+                                }
+                            }
+                        } else {
+                            for (var gi = 0; gi < grandChildren.length; gi++) {
+                                walkNode(grandChildren[gi], branchId);
+                            }
                         }
                     }
                 }
@@ -14022,5 +14210,14 @@ function isCanonicalUuid(value) {
          支持列表更新、入口链接更新
     ================================================================================
     -->
+
+    <!-- 底部确认条 -->
+    <div class="confirm-bar" id="confirmBar">
+        <span class="confirm-bar-text" id="confirmBarText"></span>
+        <div class="confirm-bar-actions">
+            <button class="confirm-bar-cancel" onclick="dismissConfirmBar(false)">取消</button>
+            <button class="confirm-bar-confirm" onclick="dismissConfirmBar(true)">确认删除</button>
+        </div>
+    </div>
 </body>
 </html>
