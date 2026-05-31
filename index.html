@@ -5819,30 +5819,15 @@
 
         function estimateDeepSeekNewConversationMessageCount(conv) {
             if (conv && Array.isArray(conv._editedMessages)) {
-                return conv._editedMessages.filter(msg => String(msg?.content || '').trim()).length;
+                return conv._editedMessages.filter(function(msg) { return String((msg && msg.content) || '').trim(); }).length;
             }
-            const mapping = conv && typeof conv.mapping === 'object' ? conv.mapping : {};
-            let count = 0;
-            Object.keys(mapping).forEach(key => {
-                const fragments = mapping[key]?.message?.fragments;
-                if (!Array.isArray(fragments) || fragments.length === 0) return;
-
-                let hasRequest = false;
-                let hasResponse = false;
-                let hasThink = false;
-                fragments.forEach(fragment => {
-                    const type = String(fragment?.type || '');
-                    const content = String(fragment?.content || '').trim();
-                    if (!content) return;
-                    if (type === 'REQUEST') hasRequest = true;
-                    if (type === 'RESPONSE') hasResponse = true;
-                    if (type === 'THINK') hasThink = true;
-                });
-
-                if (hasRequest) count++;
-                if (hasResponse) count++;
-                if (!hasRequest && !hasResponse && hasThink) count++;
-            });
+            var mapping = conv && typeof conv.mapping === 'object' ? conv.mapping : {};
+            // 用真实提取结果计算，而不是按片段类型估算，消除 ~1% 误差
+            var extracted = extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
+            var count = 0;
+            for (var i = 0; i < extracted.length; i++) {
+                count += (extracted[i].messages ? extracted[i].messages.length : 0);
+            }
             return count;
         }
 
