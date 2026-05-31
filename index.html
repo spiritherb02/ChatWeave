@@ -4484,7 +4484,7 @@
                 'mission.pill.local': '本地处理',
                 'mission.pill.edit': '可预览可编辑',
                 'mission.pill.rollback': '可回滚',
-                'mission.btn.primary': '开始带回熟悉的 ta',
+                'mission.btn.primary': '开始迁移',
                 'mission.btn.secondary': '了解使用方法',
                 'warning.title': '合并前，最重要的一件事',
                 'warning.desc': '务必保留 RikkaHub 原始备份 ZIP。任何时候出问题，清空 App 数据后恢复备份即可回退。',
@@ -4526,7 +4526,7 @@
                 'workspace.meta': '已选 {selected} / {total}',
                 'workspace.searchPlaceholder': '搜索会话标题、来源或关键词...',
                 'workspace.selectAll': '全选',
-                'workspace.selectNone': '全不选',
+                'workspace.selectNone': '取消全选',
                 'workspace.invert': '反选',
                 'workspace.deleteSelected': '🗑 删除选中',
                 'workspace.deleteConfirm': '确定要删除选中的 {count} 个会话吗？此操作不可撤销。',
@@ -4534,7 +4534,8 @@
                 'workspace.fullscreen.exit': '退出全屏',
                 'workspace.fullscreen.title.enter': '放大工作台，方便小屏编辑',
                 'workspace.fullscreen.title.exit': '退出全屏工作台',
-                'workspace.noMatch': '没有匹配的对话',
+                'workspace.noMatch': '没有匹配的会话',
+                'workspace.selectionCount': '已选 {selected} / {total}',
                 'workspace.messageCount': '{count} 条消息',
                 'workspace.preview': '预览',
                 'workspace.edit': '编辑',
@@ -4551,7 +4552,7 @@
                 'merge.assistant.bySource': '按来源分配助手（推荐）',
                 'merge.assistant.single': '全部归入同一个助手',
                 'merge.assistant.nameLabel': '统一助手名称',
-                'merge.assistant.namePlaceholder': '留空则使用默认名称：统一导入',
+                'merge.assistant.namePlaceholder': '留空则使用默认名称："导入的会话"',
                 'merge.assistant.hint.bySource': '默认会按来源分配助手，后续更容易区分。',
                 'merge.assistant.hint.single': '所有对话都会归入同一个助手，适合统一归档。',
                 'merge.button.ready': '合并聊天记录',
@@ -4614,7 +4615,7 @@
                 'error.rikkaDbMissing': 'RikkaHub 压缩包中未找到 rikka_hub.db 文件。ZIP 文件中包含: {files}',
                 'info.rikkaDbLoadedWal': '已加载 RikkaHub 数据库（从 WAL 重建 {frameCount} 帧），包含 {count} 个会话',
                 'info.rikkaDbLoaded': '已加载 RikkaHub 数据库，包含 {count} 个会话',
-                'info.rikkaPartFormatDetected': '已识别目标备份：数据库版本 {version}，消息类型格式 {format}',
+                'info.rikkaPartFormatDetected': '已识别目标备份：数据库版本 {version}，消息块格式 {format}',
                 'label.partFormat.legacy': '旧版（完整类名）',
                 'label.partFormat.v2': '新版（v2/2.0 短类型名）',
                 'info.rikkaSettingsLoaded': '已加载 RikkaHub 设置文件，包含 {count} 个助手',
@@ -4654,7 +4655,7 @@
                 'success.titleHint.youraiscroll': '导出 JSON 对话会尽量保留原标题。',
                 'success.titleHint.qwen': 'Qwen 官方导出 JSON 会尽量保留原标题与时间。',
                 'success.titleHint.multi': '多来源合并完成：{summary}。',
-                'success.assistant.single': '助手策略：统一到单一助手。',
+                'success.assistant.single': '助手策略：全部归入同一助手。',
                 'success.assistant.bySource': '助手策略：按来源分配助手。',
                 'summary.mergeModal': '本次已选 {selected} 个会话，实际新增 {added} 个会话，写入 {messages} 条消息，跳过 {skipped} 个。',
                 'summary.unknownMore': '...其余 {count} 条未展示',
@@ -4733,6 +4734,7 @@
                 'workspace.fullscreen.title.enter': 'Expand workspace for easier editing on small screens',
                 'workspace.fullscreen.title.exit': 'Exit fullscreen workspace',
                 'workspace.noMatch': 'No matched conversations',
+                'workspace.selectionCount': 'Selected {selected} / {total}',
                 'workspace.messageCount': '{count} messages',
                 'workspace.preview': 'Preview',
                 'workspace.edit': 'Edit',
@@ -6075,12 +6077,12 @@
                 : conversations;
 
             // 统计
-            const selectedCount = visible.filter(c => c.selected !== false).length;
-            const metaEl = document.getElementById('workspaceMeta');
-            if (metaEl) metaEl.textContent = `已选 ${selectedCount} / ${visible.length}`;
+            const selectedCount = visible.filter(function(c) { return c.selected !== false; }).length;
+            var metaEl = document.getElementById('workspaceMeta');
+            if (metaEl) metaEl.textContent = t('workspace.selectionCount').replace('{selected}', selectedCount).replace('{total}', visible.length);
 
             if (visible.length === 0) {
-                list.innerHTML = '<div class="workspace-empty">没有匹配的对话</div>';
+                list.innerHTML = '<div class="workspace-empty">' + t('workspace.noMatch') + '</div>';
                 return;
             }
 
@@ -6099,7 +6101,7 @@
                     '<span class="ws-card-title">' + escapeWorkspaceHtml(item.title) + '</span>' +
                     '</div>' +
                     '<div class="ws-card-meta">' +
-                    '<span>' + item.messageCount + ' 条消息</span>' +
+                    '<span>' + t('workspace.messageCount').replace('{count}', item.messageCount) + '</span>' +
                     '<span class="ws-card-badge">' + escapeWorkspaceHtml(item.sourceLabel) + '</span>' +
                     (timeStr ? '<span>' + timeStr + '</span>' : '') +
                     '</div>' +
@@ -6197,10 +6199,9 @@
 
             // 顶栏
             document.getElementById('editorTitle').textContent = item.title;
-            document.getElementById('editorMeta').innerHTML = `
-                <span class="ws-card-badge">${escapeWorkspaceHtml(item.sourceLabel)}</span>
-                ${item.messageCount} 条消息
-            `;
+            document.getElementById('editorMeta').innerHTML = '' +
+                '<span class="ws-card-badge">' + escapeWorkspaceHtml(item.sourceLabel) + '</span> ' +
+                t('workspace.messageCount').replace('{count}', item.messageCount);
 
             renderEditorMessages();
             document.getElementById('workspaceEditorPage').classList.add('active');
