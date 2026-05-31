@@ -12884,8 +12884,16 @@
                     }
 
                     sourceBucket.added++;
-                    sourceBucket.messagesAdded += messages.length;
-                    insertedMessageCount += messages.length;
+                    // 同步分支提取: messageNodes 各条目 messages 总和 = 真实消息数
+                    var convMsgCount = messages.length;
+                    if (Array.isArray(payload.messageNodes) && payload.messageNodes.length > 0) {
+                        convMsgCount = 0;
+                        for (var mni = 0; mni < payload.messageNodes.length; mni++) {
+                            convMsgCount += (payload.messageNodes[mni].messages ? payload.messageNodes[mni].messages.length : 0);
+                        }
+                    }
+                    sourceBucket.messagesAdded += convMsgCount;
+                    insertedMessageCount += convMsgCount;
                     simulatedConversationIds.add(convId);
 
                     preparedConversations.push({
