@@ -13904,7 +13904,7 @@
                         result.push({
                             nodeIndex: nodeIndexCounter++,
                             messages: branchAssistants,
-                            selectIndex: 0
+                            selectIndex: branchAssistants.length - 1
                         });
                     }
 
@@ -13957,10 +13957,10 @@
                                             }
                                         }
                                         if (requestVariants.length > 0) {
-                                            result.push({ nodeIndex: nodeIndexCounter++, messages: requestVariants, selectIndex: 0 });
+                                            result.push({ nodeIndex: nodeIndexCounter++, messages: requestVariants, selectIndex: requestVariants.length - 1 });
                                         }
                                         if (allAssistants.length > 0) {
-                                            result.push({ nodeIndex: nodeIndexCounter++, messages: allAssistants, selectIndex: 0 });
+                                            result.push({ nodeIndex: nodeIndexCounter++, messages: allAssistants, selectIndex: allAssistants.length - 1 });
                                         }
                                     }
                                 }
