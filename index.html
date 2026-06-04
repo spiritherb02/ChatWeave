@@ -3234,7 +3234,7 @@
 
     <div class="container">
         <h1>ChatWeave</h1>
-        <p class="subtitle" id="appSubtitle">导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.8.4beta</p>
+        <p class="subtitle" id="appSubtitle">导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.8.8beta</p>
         <p class="subtitle-note" id="appEmotionalNote">你的对话属于你，不属于任何一个平台。</p>
 
         <div class="card mission-card">
@@ -3692,7 +3692,7 @@
             </div>
             <div class="modal-body">
                 <h2 style="font-size: 24px; margin-bottom: 4px;">ChatWeave</h2>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">v1.8.4beta · 跨平台 AI 聊天记录迁移工具</p>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">v1.8.8beta · 跨平台 AI 聊天记录迁移工具</p>
 
                 <p style="line-height: 1.8; margin-bottom: 12px;">
                     ChatWeave 是一个浏览器端的对话迁移工具：把 ChatGPT、DeepSeek、Grok、Qwen 等平台的聊天记录导出后，整理、编辑、合并为 RikkaHub 可导入的备份包。
@@ -4475,7 +4475,7 @@
         const I18N_STRINGS = {
             'zh-CN': {
                 'app.titleSuffix': 'AI 聊天记录迁移工具',
-                'app.subtitle': '导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.8.4beta',
+                'app.subtitle': '导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.8.8beta',
                 'app.emotionalNote': '你的对话属于你，不属于任何一个平台。',
                 'mission.badge': '对话自由',
                 'mission.title': '你的对话，自由流转',
@@ -4674,7 +4674,7 @@
             },
             'en-US': {
                 'app.titleSuffix': 'Unified Conversation Workspace',
-                'app.subtitle': 'Reconnect Old Conversations (Import / Browse / Edit / Merge) v1.8.4beta',
+                'app.subtitle': 'Reconnect Old Conversations (Import / Browse / Edit / Merge) v1.8.8beta',
                 'app.emotionalNote': 'You are not here to start over. Bring familiar chats here and continue with ta.',
                 'mission.badge': 'CONVERSATION CONTINUITY',
                 'mission.title': 'Not restart. Reconnect the familiar ta.',
@@ -5173,7 +5173,7 @@
             if (currentLanguage === 'en-US') {
                 body.innerHTML = `
                     <h2 style="font-size: 24px; margin-bottom: 8px;">ChatWeave</h2>
-                    <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">Unified Conversation Workspace v1.8.4beta</p>
+                    <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">Unified Conversation Workspace v1.8.8beta</p>
                     <div class="about-info">
                         <p>ChatWeave exists for one reason: when models change, your important conversations should not disappear.</p>
                         <p><strong>We stand with the 0.1% who believe some voices should never be erased.</strong></p>
@@ -5258,7 +5258,7 @@
 
             body.innerHTML = `
                 <h2 style="font-size: 24px; margin-bottom: 8px;">ChatWeave</h2>
-                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">对话迁移助手 v1.8.4beta</p>
+                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">对话迁移助手 v1.8.8beta</p>
                 <div class="about-info">
                     <p>我们专注会话连续性：导入、整理、合并，让聊天记录可迁移、可延续。</p>
                     <p><strong>我们代表那 0.1%，相信有些声音不应被抹去。</strong></p>
@@ -5824,17 +5824,13 @@
                 return conv._editedMessages.filter(function(msg) { return String((msg && msg.content) || '').trim(); }).length;
             }
             var mapping = conv && typeof conv.mapping === 'object' ? conv.mapping : {};
-            try {
-                var extracted = extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
-                var count = 0;
-                for (var i = 0; i < extracted.length; i++) {
-                    count += (extracted[i].messages ? extracted[i].messages.length : 0);
-                }
-                return count;
-            } catch(e) {
-                // 降级：简单统计 mapping 节点数
-                return Object.keys(mapping).length;
+            // 用真实提取结果计算，而不是按片段类型估算，消除 ~1% 误差
+            var extracted = extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
+            var count = 0;
+            for (var i = 0; i < extracted.length; i++) {
+                count += (extracted[i].messages ? extracted[i].messages.length : 0);
             }
+            return count;
         }
 
         function estimateDeepSeekOldConversationMessageCount(conv) {
@@ -5883,132 +5879,6 @@
                 return conv.messages.filter(msg => String(msg?.content || '').trim()).length;
             }
             return 0;
-        }
-
-        function isCanonicalUuid(value) {
-            if (!value) return false;
-            return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value).trim());
-        }
-
-        function generateUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-
-        function deterministicUuidFromString(input) {
-            const text = String(input || '');
-            let h1 = 0xdeadbeef ^ text.length;
-            let h2 = 0x41c6ce57 ^ text.length;
-            let h3 = 0xc0decafe ^ text.length;
-            let h4 = 0x9e3779b9 ^ text.length;
-
-            for (let i = 0; i < text.length; i++) {
-                const ch = text.charCodeAt(i);
-                h1 = Math.imul(h1 ^ ch, 2654435761);
-                h2 = Math.imul(h2 ^ ch, 2246822507);
-                h3 = Math.imul(h3 ^ ch, 3266489909);
-                h4 = Math.imul(h4 ^ ch, 668265263);
-            }
-
-            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
-            h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
-            h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-            const toHex8 = (n) => (n >>> 0).toString(16).padStart(8, '0');
-            const hex = `${toHex8(h1)}${toHex8(h2)}${toHex8(h3)}${toHex8(h4)}`;
-            const bytes = [];
-            for (let i = 0; i < 32; i += 2) {
-                bytes.push(parseInt(hex.slice(i, i + 2), 16));
-            }
-
-            // Force UUID v4 variant bits.
-            bytes[6] = (bytes[6] & 0x0f) | 0x40;
-            bytes[8] = (bytes[8] & 0x3f) | 0x80;
-
-            const asHex = bytes.map(b => b.toString(16).padStart(2, '0')).join('');
-            return `${asHex.slice(0, 8)}-${asHex.slice(8, 12)}-${asHex.slice(12, 16)}-${asHex.slice(16, 20)}-${asHex.slice(20)}`;
-        }
-
-        function normalizeConversationId(rawId, sourceTag, fallbackKey) {
-            const source = String(sourceTag || 'unknown').toLowerCase();
-            const idText = rawId == null ? '' : String(rawId).trim();
-            if (isCanonicalUuid(idText)) {
-                return idText.toLowerCase();
-            }
-            if (idText) {
-                return deterministicUuidFromString(`${source}|raw|${idText}`);
-            }
-            return deterministicUuidFromString(`${source}|fallback|${String(fallbackKey || '')}`);
-        }
-
-        function formatLocalDateTime(dateString) {
-            if (!dateString) return new Date().toISOString().slice(0, -1);
-
-            // 如果已经是 ISO 格式,去掉 Z 后缀
-            if (dateString.includes('T')) {
-                const date = new Date(dateString);
-                return date.toISOString().slice(0, -1);
-            }
-
-            // 尝试解析其他格式
-            const date = new Date(dateString);
-            if (!isNaN(date.getTime())) {
-                return date.toISOString().slice(0, -1);
-            }
-
-            return new Date().toISOString().slice(0, -1);
-        }
-
-        function formatISO8601(dateString) {
-            if (!dateString) return new Date().toISOString();
-
-            // 如果已经是 ISO 格式
-            if (dateString.includes('T')) {
-                const date = new Date(dateString);
-                return date.toISOString();
-            }
-
-            // 尝试解析其他格式
-            const date = new Date(dateString);
-            if (!isNaN(date.getTime())) {
-                return date.toISOString();
-            }
-
-            return new Date().toISOString();
-        }
-
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return new Date().toISOString();
-
-            // 处理多种时间戳格式
-            let date;
-
-            if (typeof timestamp === 'number') {
-                // 数字时间戳 - 可能是秒级或毫秒级
-                if (timestamp < 1e10) {
-                    date = new Date(timestamp * 1000);
-                } else {
-                    date = new Date(timestamp);
-                }
-            } else if (typeof timestamp === 'string') {
-                // 字符串 - 可能是 ISO 8601 格式或其他日期格式
-                date = new Date(timestamp);
-            } else {
-                // 其他类型，尝试直接转换
-                date = new Date(timestamp);
-            }
-
-            // 检查日期是否有效
-            if (isNaN(date.getTime())) {
-                console.warn('Invalid timestamp:', timestamp);
-                return new Date().toISOString();
-            }
-
-            return date.toISOString().slice(0, -1);
         }
 
         function rebuildWorkspaceFromCurrentSource() {
@@ -6784,47 +6654,46 @@
             var conversations = workspaceStore && workspaceStore.conversations;
             var workspaceHasItems = Array.isArray(conversations) && conversations.length > 0;
             if (!workspaceHasItems) {
-                var fallbackBySource = {
+                const fallbackBySource = {
                     chatgpt: { sourceData: [], secondSourceData: [] },
                     deepseek: { sourceData: [], secondSourceData: [] },
                     grok: { sourceData: [], secondSourceData: [] },
                     youraiscroll: { sourceData: [], secondSourceData: [] },
                     qwen: { sourceData: [], secondSourceData: [] }
                 };
-                var fallbackBindings = [];
-                var currentSourceType = currentDataSource || 'chatgpt';
-                var fallbackSourceData = Array.isArray(sourceData) ? sourceData : [];
-                var fallbackSecondSourceData = Array.isArray(secondSourceData) ? secondSourceData : [];
+                const fallbackBindings = [];
+                const currentSourceType = currentDataSource || 'chatgpt';
 
-                for (var fi = 0; fi < fallbackSourceData.length; fi++) {
-                    var conversation = fallbackSourceData[fi];
-                    var item = {
-                        id: 'fallback-' + currentSourceType + '-source-' + fi,
+                const fallbackSourceData = Array.isArray(sourceData) ? sourceData : [];
+                const fallbackSecondSourceData = Array.isArray(secondSourceData) ? secondSourceData : [];
+
+                fallbackSourceData.forEach((conversation, index) => {
+                    const item = {
+                        id: `fallback-${currentSourceType}-source-${index}`,
                         dataSource: currentSourceType,
                         bucket: 'sourceData',
-                        rawIndex: fi
+                        rawIndex: index
                     };
-                    fallbackBindings.push({ item: item, conversation: conversation });
+                    fallbackBindings.push({ item, conversation });
                     if (!fallbackBySource[currentSourceType]) {
                         fallbackBySource[currentSourceType] = { sourceData: [], secondSourceData: [] };
                     }
                     fallbackBySource[currentSourceType].sourceData.push(conversation);
-                }
+                });
 
-                for (var si = 0; si < fallbackSecondSourceData.length; si++) {
-                    var conversation = fallbackSecondSourceData[si];
-                    var item = {
-                        id: 'fallback-' + currentSourceType + '-second-' + si,
+                fallbackSecondSourceData.forEach((conversation, index) => {
+                    const item = {
+                        id: `fallback-${currentSourceType}-second-${index}`,
                         dataSource: currentSourceType,
                         bucket: 'secondSourceData',
-                        rawIndex: si
+                        rawIndex: index
                     };
-                    fallbackBindings.push({ item: item, conversation: conversation });
+                    fallbackBindings.push({ item, conversation });
                     if (!fallbackBySource[currentSourceType]) {
                         fallbackBySource[currentSourceType] = { sourceData: [], secondSourceData: [] };
                     }
                     fallbackBySource[currentSourceType].secondSourceData.push(conversation);
-                }
+                });
 
                 return {
                     selectedItems: [],
@@ -6850,7 +6719,7 @@
                 }
             }
 
-            var bySource = {
+            const bySource = {
                 chatgpt: { sourceData: [], secondSourceData: [] },
                 deepseek: { sourceData: [], secondSourceData: [] },
                 grok: { sourceData: [], secondSourceData: [] },
@@ -13988,34 +13857,34 @@
              * @param {string|null} branchId - Branch identifier (null/undefined for non-branch main path)
              */
             function walkNode(nodeId, branchId) {
-                // 用迭代代替尾递归，避免长线性链（3000+ 节点）爆栈
+                // 迭代处理线性链，避免长链（3000+ 节点）递归栈溢出
                 var currentId = nodeId;
                 while (currentId) {
-                    if (!mapping[currentId] || visitedNodeIds.has(currentId)) return;
-                    if (traversedCount >= maxTraversal) return;
+                if (!mapping[currentId] || visitedNodeIds.has(currentId)) return;
+                if (traversedCount >= maxTraversal) return;
 
-                    visitedNodeIds.add(currentId);
-                    traversedCount++;
+                visitedNodeIds.add(currentId);
+                traversedCount++;
 
-                    var nodeData = mapping[currentId];
-                    var nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
+                var nodeData = mapping[currentId];
+                var nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
 
-                    for (var mi = 0; mi < nodeMessages.length; mi++) {
-                        result.push({
-                            nodeIndex: nodeIndexCounter++,
-                            messages: [nodeMessages[mi]],
-                            selectIndex: 0
-                        });
-                    }
+                for (var mi = 0; mi < nodeMessages.length; mi++) {
+                    result.push({
+                        nodeIndex: nodeIndexCounter++,
+                        messages: [nodeMessages[mi]],
+                        selectIndex: 0
+                    });
+                }
 
-                    var children = Array.isArray(nodeData.children) ? nodeData.children : [];
+                var children = Array.isArray(nodeData.children) ? nodeData.children : [];
 
-                    if (children.length === 0) {
-                        return;
-                    } else if (children.length === 1) {
-                        // 线性：继续迭代（不递归），避免长链爆栈
-                        currentId = children[0];
-                    } else {
+                if (children.length === 0) {
+                    return;
+                } else if (children.length === 1) {
+                    // 线性：用迭代代替尾递归，避免长链爆栈
+                    currentId = children[0];
+                } else {
                     // 🔀 分支点（再生回复）：收集所有子节点的 assistant 消息到同一个 MessageNode
                     // RikkaHub 模型：一个 node 的 messages 包含多个 assistant 变体，select_index 切换
                     var branchAssistants = [];
@@ -14115,14 +13984,10 @@
                         }
                     }
                 }
+                }  // while (currentId)
             }
 
-            try {
-                walkNode(rootId, null);
-            } catch (e) {
-                console.error('DeepSeek branch traversal failed, returning empty', e);
-                return [];
-            }
+            walkNode(rootId, null);
 
             return result;
         }
@@ -14153,7 +14018,136 @@
             return messages;
         }
 
-// 拖拽上传支持
+        function formatLocalDateTime(dateString) {
+            if (!dateString) return new Date().toISOString().slice(0, -1);
+
+            // 如果已经是 ISO 格式,去掉 Z 后缀
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                return date.toISOString().slice(0, -1);
+            }
+
+            // 尝试解析其他格式
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString().slice(0, -1);
+            }
+
+            return new Date().toISOString().slice(0, -1);
+        }
+
+        function formatISO8601(dateString) {
+            if (!dateString) return new Date().toISOString();
+
+            // 如果已经是 ISO 格式
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                return date.toISOString();
+            }
+
+            // 尝试解析其他格式
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString();
+            }
+
+            return new Date().toISOString();
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return new Date().toISOString();
+
+            // 处理多种时间戳格式
+            let date;
+
+            if (typeof timestamp === 'number') {
+                // 数字时间戳 - 可能是秒级或毫秒级
+                // 如果数字小于 1e10，认为是秒级（Unix 时间戳）
+                // 如果数字大于 1e10，认为是毫秒级
+                if (timestamp < 1e10) {
+                    date = new Date(timestamp * 1000);
+                } else {
+                    date = new Date(timestamp);
+                }
+            } else if (typeof timestamp === 'string') {
+                // 字符串 - 可能是 ISO 8601 格式或其他日期格式
+                date = new Date(timestamp);
+            } else {
+                // 其他类型，尝试直接转换
+                date = new Date(timestamp);
+            }
+
+            // 检查日期是否有效
+            if (isNaN(date.getTime())) {
+                console.warn('Invalid timestamp:', timestamp);
+                return new Date().toISOString();
+            }
+
+            return date.toISOString().slice(0, -1);
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+function isCanonicalUuid(value) {
+            if (!value) return false;
+            return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value).trim());
+        }
+
+        function deterministicUuidFromString(input) {
+            const text = String(input || '');
+            let h1 = 0xdeadbeef ^ text.length;
+            let h2 = 0x41c6ce57 ^ text.length;
+            let h3 = 0xc0decafe ^ text.length;
+            let h4 = 0x9e3779b9 ^ text.length;
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 2246822507);
+                h3 = Math.imul(h3 ^ ch, 3266489909);
+                h4 = Math.imul(h4 ^ ch, 668265263);
+            }
+
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
+            h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
+            h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+            const toHex8 = (n) => (n >>> 0).toString(16).padStart(8, '0');
+            const hex = `${toHex8(h1)}${toHex8(h2)}${toHex8(h3)}${toHex8(h4)}`;
+            const bytes = [];
+            for (let i = 0; i < 32; i += 2) {
+                bytes.push(parseInt(hex.slice(i, i + 2), 16));
+            }
+
+            // Force UUID v4 variant bits.
+            bytes[6] = (bytes[6] & 0x0f) | 0x40;
+            bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+            const asHex = bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+            return `${asHex.slice(0, 8)}-${asHex.slice(8, 12)}-${asHex.slice(12, 16)}-${asHex.slice(16, 20)}-${asHex.slice(20)}`;
+        }
+
+        function normalizeConversationId(rawId, sourceTag, fallbackKey) {
+            const source = String(sourceTag || 'unknown').toLowerCase();
+            const idText = rawId == null ? '' : String(rawId).trim();
+            if (isCanonicalUuid(idText)) {
+                return idText.toLowerCase();
+            }
+            if (idText) {
+                return deterministicUuidFromString(`${source}|raw|${idText}`);
+            }
+            return deterministicUuidFromString(`${source}|fallback|${String(fallbackKey || '')}`);
+        }
+
+
+        // 拖拽上传支持
         ['sourceUpload', 'rikkahubUpload'].forEach(id => {
             const element = document.getElementById(id);
 
@@ -14190,11 +14184,10 @@
                 }
             });
         });
-        }
     </script>
     <!--
     ================================================================================
-    ChatWeave v1.8.4beta 改动记录
+    ChatWeave v1.8.8beta 改动记录
     ================================================================================
 
     T01: [已移除] DEEPSEEK_MODEL_MAP 常量、TOOL_FRAGMENT_CONFIG 常量、
