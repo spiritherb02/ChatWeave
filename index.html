@@ -5885,6 +5885,58 @@
             return 0;
         }
 
+        function isCanonicalUuid(value) {
+            if (!value) return false;
+            return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value).trim());
+        }
+
+        function deterministicUuidFromString(input) {
+            const text = String(input || '');
+            let h1 = 0xdeadbeef ^ text.length;
+            let h2 = 0x41c6ce57 ^ text.length;
+            let h3 = 0xc0decafe ^ text.length;
+            let h4 = 0x9e3779b9 ^ text.length;
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 2246822507);
+                h3 = Math.imul(h3 ^ ch, 3266489909);
+                h4 = Math.imul(h4 ^ ch, 668265263);
+            }
+
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
+            h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
+            h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+            const toHex8 = (n) => (n >>> 0).toString(16).padStart(8, '0');
+            const hex = `${toHex8(h1)}${toHex8(h2)}${toHex8(h3)}${toHex8(h4)}`;
+            const bytes = [];
+            for (let i = 0; i < 32; i += 2) {
+                bytes.push(parseInt(hex.slice(i, i + 2), 16));
+            }
+
+            // Force UUID v4 variant bits.
+            bytes[6] = (bytes[6] & 0x0f) | 0x40;
+            bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+            const asHex = bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+            return `${asHex.slice(0, 8)}-${asHex.slice(8, 12)}-${asHex.slice(12, 16)}-${asHex.slice(16, 20)}-${asHex.slice(20)}`;
+        }
+
+        function normalizeConversationId(rawId, sourceTag, fallbackKey) {
+            const source = String(sourceTag || 'unknown').toLowerCase();
+            const idText = rawId == null ? '' : String(rawId).trim();
+            if (isCanonicalUuid(idText)) {
+                return idText.toLowerCase();
+            }
+            if (idText) {
+                return deterministicUuidFromString(`${source}|raw|${idText}`);
+            }
+            return deterministicUuidFromString(`${source}|fallback|${String(fallbackKey || '')}`);
+        }
+
         function rebuildWorkspaceFromCurrentSource() {
             const searchInput = document.getElementById('workspaceSearchInput');
             const previousSelection = new Map((workspaceStore.conversations || []).map(item => [item.id, item.selected !== false]));
@@ -14102,59 +14154,6 @@
                 return v.toString(16);
             });
         }
-
-function isCanonicalUuid(value) {
-            if (!value) return false;
-            return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value).trim());
-        }
-
-        function deterministicUuidFromString(input) {
-            const text = String(input || '');
-            let h1 = 0xdeadbeef ^ text.length;
-            let h2 = 0x41c6ce57 ^ text.length;
-            let h3 = 0xc0decafe ^ text.length;
-            let h4 = 0x9e3779b9 ^ text.length;
-
-            for (let i = 0; i < text.length; i++) {
-                const ch = text.charCodeAt(i);
-                h1 = Math.imul(h1 ^ ch, 2654435761);
-                h2 = Math.imul(h2 ^ ch, 2246822507);
-                h3 = Math.imul(h3 ^ ch, 3266489909);
-                h4 = Math.imul(h4 ^ ch, 668265263);
-            }
-
-            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
-            h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
-            h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-            const toHex8 = (n) => (n >>> 0).toString(16).padStart(8, '0');
-            const hex = `${toHex8(h1)}${toHex8(h2)}${toHex8(h3)}${toHex8(h4)}`;
-            const bytes = [];
-            for (let i = 0; i < 32; i += 2) {
-                bytes.push(parseInt(hex.slice(i, i + 2), 16));
-            }
-
-            // Force UUID v4 variant bits.
-            bytes[6] = (bytes[6] & 0x0f) | 0x40;
-            bytes[8] = (bytes[8] & 0x3f) | 0x80;
-
-            const asHex = bytes.map(b => b.toString(16).padStart(2, '0')).join('');
-            return `${asHex.slice(0, 8)}-${asHex.slice(8, 12)}-${asHex.slice(12, 16)}-${asHex.slice(16, 20)}-${asHex.slice(20)}`;
-        }
-
-        function normalizeConversationId(rawId, sourceTag, fallbackKey) {
-            const source = String(sourceTag || 'unknown').toLowerCase();
-            const idText = rawId == null ? '' : String(rawId).trim();
-            if (isCanonicalUuid(idText)) {
-                return idText.toLowerCase();
-            }
-            if (idText) {
-                return deterministicUuidFromString(`${source}|raw|${idText}`);
-            }
-            return deterministicUuidFromString(`${source}|fallback|${String(fallbackKey || '')}`);
-        }
-
 
         // 拖拽上传支持
         ['sourceUpload', 'rikkahubUpload'].forEach(id => {
