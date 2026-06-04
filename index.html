@@ -5945,6 +5945,72 @@
             return deterministicUuidFromString(`${source}|fallback|${String(fallbackKey || '')}`);
         }
 
+        function formatLocalDateTime(dateString) {
+            if (!dateString) return new Date().toISOString().slice(0, -1);
+
+            // 如果已经是 ISO 格式,去掉 Z 后缀
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                return date.toISOString().slice(0, -1);
+            }
+
+            // 尝试解析其他格式
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString().slice(0, -1);
+            }
+
+            return new Date().toISOString().slice(0, -1);
+        }
+
+        function formatISO8601(dateString) {
+            if (!dateString) return new Date().toISOString();
+
+            // 如果已经是 ISO 格式
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                return date.toISOString();
+            }
+
+            // 尝试解析其他格式
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString();
+            }
+
+            return new Date().toISOString();
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return new Date().toISOString();
+
+            // 处理多种时间戳格式
+            let date;
+
+            if (typeof timestamp === 'number') {
+                // 数字时间戳 - 可能是秒级或毫秒级
+                if (timestamp < 1e10) {
+                    date = new Date(timestamp * 1000);
+                } else {
+                    date = new Date(timestamp);
+                }
+            } else if (typeof timestamp === 'string') {
+                // 字符串 - 可能是 ISO 8601 格式或其他日期格式
+                date = new Date(timestamp);
+            } else {
+                // 其他类型，尝试直接转换
+                date = new Date(timestamp);
+            }
+
+            // 检查日期是否有效
+            if (isNaN(date.getTime())) {
+                console.warn('Invalid timestamp:', timestamp);
+                return new Date().toISOString();
+            }
+
+            return date.toISOString().slice(0, -1);
+        }
+
         function rebuildWorkspaceFromCurrentSource() {
             const searchInput = document.getElementById('workspaceSearchInput');
             const previousSelection = new Map((workspaceStore.conversations || []).map(item => [item.id, item.selected !== false]));
@@ -14085,77 +14151,8 @@
             }
 
             return messages;
-        }
 
-        function formatLocalDateTime(dateString) {
-            if (!dateString) return new Date().toISOString().slice(0, -1);
-
-            // 如果已经是 ISO 格式,去掉 Z 后缀
-            if (dateString.includes('T')) {
-                const date = new Date(dateString);
-                return date.toISOString().slice(0, -1);
-            }
-
-            // 尝试解析其他格式
-            const date = new Date(dateString);
-            if (!isNaN(date.getTime())) {
-                return date.toISOString().slice(0, -1);
-            }
-
-            return new Date().toISOString().slice(0, -1);
-        }
-
-        function formatISO8601(dateString) {
-            if (!dateString) return new Date().toISOString();
-
-            // 如果已经是 ISO 格式
-            if (dateString.includes('T')) {
-                const date = new Date(dateString);
-                return date.toISOString();
-            }
-
-            // 尝试解析其他格式
-            const date = new Date(dateString);
-            if (!isNaN(date.getTime())) {
-                return date.toISOString();
-            }
-
-            return new Date().toISOString();
-        }
-
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return new Date().toISOString();
-
-            // 处理多种时间戳格式
-            let date;
-
-            if (typeof timestamp === 'number') {
-                // 数字时间戳 - 可能是秒级或毫秒级
-                // 如果数字小于 1e10，认为是秒级（Unix 时间戳）
-                // 如果数字大于 1e10，认为是毫秒级
-                if (timestamp < 1e10) {
-                    date = new Date(timestamp * 1000);
-                } else {
-                    date = new Date(timestamp);
-                }
-            } else if (typeof timestamp === 'string') {
-                // 字符串 - 可能是 ISO 8601 格式或其他日期格式
-                date = new Date(timestamp);
-            } else {
-                // 其他类型，尝试直接转换
-                date = new Date(timestamp);
-            }
-
-            // 检查日期是否有效
-            if (isNaN(date.getTime())) {
-                console.warn('Invalid timestamp:', timestamp);
-                return new Date().toISOString();
-            }
-
-            return date.toISOString().slice(0, -1);
-        }
-
-        // 拖拽上传支持
+// 拖拽上传支持
         ['sourceUpload', 'rikkahubUpload'].forEach(id => {
             const element = document.getElementById(id);
 
