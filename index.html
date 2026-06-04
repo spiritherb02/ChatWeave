@@ -13924,8 +13924,8 @@
                         });
                     }
 
-                    // 扫描所有分支子节点的后代，顺向遍历保证续聊按分支顺序排列（A1→An）
-                    for (var ci = 0; ci < children.length; ci++) {
+                    // 扫描所有分支子节点的后代，倒序遍历让主分支（最后一条）续聊排在最前
+                    for (var ci = children.length - 1; ci >= 0; ci--) {
                         var branchChild = mapping[children[ci]];
                         if (!branchChild) continue;
                         // 检查该子节点的直接子节点
