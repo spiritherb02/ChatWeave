@@ -13924,8 +13924,8 @@
                         });
                     }
 
-                    // 扫描所有分支子节点的后代，倒序遍历让主分支（最后一条）续聊排在最前
-                    for (var ci = children.length - 1; ci >= 0; ci--) {
+                    // 扫描所有分支子节点的后代，正向遍历让最后的分支（主线）排在末尾
+                    for (var ci = 0; ci < children.length; ci++) {
                         var branchChild = mapping[children[ci]];
                         if (!branchChild) continue;
                         // 检查该子节点的直接子节点
