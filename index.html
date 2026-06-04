@@ -14045,7 +14045,9 @@
                                             }
                                             var snNext = Array.isArray(snNode.children) ? snNode.children : [];
                                             if (snNext.length > 0) {
-                                                for (var sni2 = 0; sni2 < snNext.length; sni2++) walkNode(snNext[sni2], branchId);
+                                                for (var sni2 = 0; sni2 < snNext.length; sni2++) {
+                                                    deferredContSteps.push({ nodeId: snNext[sni2], branchId: branchId });
+                                                }
                                             }
                                             visitedNodeIds.add(nextGen[sni]);
                                         }
