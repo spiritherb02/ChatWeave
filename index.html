@@ -5824,13 +5824,17 @@
                 return conv._editedMessages.filter(function(msg) { return String((msg && msg.content) || '').trim(); }).length;
             }
             var mapping = conv && typeof conv.mapping === 'object' ? conv.mapping : {};
-            // 用真实提取结果计算，而不是按片段类型估算，消除 ~1% 误差
-            var extracted = extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
-            var count = 0;
-            for (var i = 0; i < extracted.length; i++) {
-                count += (extracted[i].messages ? extracted[i].messages.length : 0);
+            try {
+                var extracted = extractDeepSeekBranchMessageNodes(mapping, 'deepseek-chat');
+                var count = 0;
+                for (var i = 0; i < extracted.length; i++) {
+                    count += (extracted[i].messages ? extracted[i].messages.length : 0);
+                }
+                return count;
+            } catch(e) {
+                // 降级：简单统计 mapping 节点数
+                return Object.keys(mapping).length;
             }
-            return count;
         }
 
         function estimateDeepSeekOldConversationMessageCount(conv) {
@@ -6654,46 +6658,47 @@
             var conversations = workspaceStore && workspaceStore.conversations;
             var workspaceHasItems = Array.isArray(conversations) && conversations.length > 0;
             if (!workspaceHasItems) {
-                const fallbackBySource = {
+                var fallbackBySource = {
                     chatgpt: { sourceData: [], secondSourceData: [] },
                     deepseek: { sourceData: [], secondSourceData: [] },
                     grok: { sourceData: [], secondSourceData: [] },
                     youraiscroll: { sourceData: [], secondSourceData: [] },
                     qwen: { sourceData: [], secondSourceData: [] }
                 };
-                const fallbackBindings = [];
-                const currentSourceType = currentDataSource || 'chatgpt';
+                var fallbackBindings = [];
+                var currentSourceType = currentDataSource || 'chatgpt';
+                var fallbackSourceData = Array.isArray(sourceData) ? sourceData : [];
+                var fallbackSecondSourceData = Array.isArray(secondSourceData) ? secondSourceData : [];
 
-                const fallbackSourceData = Array.isArray(sourceData) ? sourceData : [];
-                const fallbackSecondSourceData = Array.isArray(secondSourceData) ? secondSourceData : [];
-
-                fallbackSourceData.forEach((conversation, index) => {
-                    const item = {
-                        id: `fallback-${currentSourceType}-source-${index}`,
+                for (var fi = 0; fi < fallbackSourceData.length; fi++) {
+                    var conversation = fallbackSourceData[fi];
+                    var item = {
+                        id: 'fallback-' + currentSourceType + '-source-' + fi,
                         dataSource: currentSourceType,
                         bucket: 'sourceData',
-                        rawIndex: index
+                        rawIndex: fi
                     };
-                    fallbackBindings.push({ item, conversation });
+                    fallbackBindings.push({ item: item, conversation: conversation });
                     if (!fallbackBySource[currentSourceType]) {
                         fallbackBySource[currentSourceType] = { sourceData: [], secondSourceData: [] };
                     }
                     fallbackBySource[currentSourceType].sourceData.push(conversation);
-                });
+                }
 
-                fallbackSecondSourceData.forEach((conversation, index) => {
-                    const item = {
-                        id: `fallback-${currentSourceType}-second-${index}`,
+                for (var si = 0; si < fallbackSecondSourceData.length; si++) {
+                    var conversation = fallbackSecondSourceData[si];
+                    var item = {
+                        id: 'fallback-' + currentSourceType + '-second-' + si,
                         dataSource: currentSourceType,
                         bucket: 'secondSourceData',
-                        rawIndex: index
+                        rawIndex: si
                     };
-                    fallbackBindings.push({ item, conversation });
+                    fallbackBindings.push({ item: item, conversation: conversation });
                     if (!fallbackBySource[currentSourceType]) {
                         fallbackBySource[currentSourceType] = { sourceData: [], secondSourceData: [] };
                     }
                     fallbackBySource[currentSourceType].secondSourceData.push(conversation);
-                });
+                }
 
                 return {
                     selectedItems: [],
@@ -6719,7 +6724,7 @@
                 }
             }
 
-            const bySource = {
+            var bySource = {
                 chatgpt: { sourceData: [], secondSourceData: [] },
                 deepseek: { sourceData: [], secondSourceData: [] },
                 grok: { sourceData: [], secondSourceData: [] },
@@ -13986,7 +13991,12 @@
                 }
             }
 
-            walkNode(rootId, null);
+            try {
+                walkNode(rootId, null);
+            } catch (e) {
+                console.error('DeepSeek branch traversal failed, returning empty', e);
+                return [];
+            }
 
             return result;
         }
