@@ -13857,30 +13857,34 @@
              * @param {string|null} branchId - Branch identifier (null/undefined for non-branch main path)
              */
             function walkNode(nodeId, branchId) {
-                if (!nodeId || !mapping[nodeId] || visitedNodeIds.has(nodeId)) return;
-                if (traversedCount >= maxTraversal) return;
+                // 用迭代代替尾递归，避免长线性链（3000+ 节点）爆栈
+                var currentId = nodeId;
+                while (currentId) {
+                    if (!mapping[currentId] || visitedNodeIds.has(currentId)) return;
+                    if (traversedCount >= maxTraversal) return;
 
-                visitedNodeIds.add(nodeId);
-                traversedCount++;
+                    visitedNodeIds.add(currentId);
+                    traversedCount++;
 
-                const nodeData = mapping[nodeId];
-                const nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
+                    var nodeData = mapping[currentId];
+                    var nodeMessages = extractMessagesFromDeepSeekNode(nodeData, deepseekModelId);
 
-                for (var mi = 0; mi < nodeMessages.length; mi++) {
-                    result.push({
-                        nodeIndex: nodeIndexCounter++,
-                        messages: [nodeMessages[mi]],
-                        selectIndex: 0
-                    });
-                }
+                    for (var mi = 0; mi < nodeMessages.length; mi++) {
+                        result.push({
+                            nodeIndex: nodeIndexCounter++,
+                            messages: [nodeMessages[mi]],
+                            selectIndex: 0
+                        });
+                    }
 
-                const children = Array.isArray(nodeData.children) ? nodeData.children : [];
+                    var children = Array.isArray(nodeData.children) ? nodeData.children : [];
 
-                if (children.length === 0) {
-                    return;
-                } else if (children.length === 1) {
-                    walkNode(children[0], branchId);
-                } else {
+                    if (children.length === 0) {
+                        return;
+                    } else if (children.length === 1) {
+                        // 线性：继续迭代（不递归），避免长链爆栈
+                        currentId = children[0];
+                    } else {
                     // 🔀 分支点（再生回复）：收集所有子节点的 assistant 消息到同一个 MessageNode
                     // RikkaHub 模型：一个 node 的 messages 包含多个 assistant 变体，select_index 切换
                     var branchAssistants = [];
