@@ -3234,7 +3234,7 @@
 
     <div class="container">
         <h1>ChatWeave</h1>
-        <p class="subtitle" id="appSubtitle">导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.8.12beta</p>
+        <p class="subtitle" id="appSubtitle">导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.9.0beta</p>
         <p class="subtitle-note" id="appEmotionalNote">你的对话属于你，不属于任何一个平台。</p>
 
         <div class="card mission-card">
@@ -3692,7 +3692,7 @@
             </div>
             <div class="modal-body">
                 <h2 style="font-size: 24px; margin-bottom: 4px;">ChatWeave</h2>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">v1.8.12beta · 跨平台 AI 聊天记录迁移工具</p>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">v1.9.0beta · 跨平台 AI 聊天记录迁移工具</p>
 
                 <p style="line-height: 1.8; margin-bottom: 12px;">
                     ChatWeave 是一个浏览器端的对话迁移工具：把 ChatGPT、DeepSeek、Grok、Qwen 等平台的聊天记录导出后，整理、编辑、合并为 RikkaHub 可导入的备份包。
@@ -4475,7 +4475,7 @@
         const I18N_STRINGS = {
             'zh-CN': {
                 'app.titleSuffix': 'AI 聊天记录迁移工具',
-                'app.subtitle': '导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.8.12beta',
+                'app.subtitle': '导入 · 整理 · 合并 — 跨平台 AI 聊天记录迁移工具 v1.9.0beta',
                 'app.emotionalNote': '你的对话属于你，不属于任何一个平台。',
                 'mission.badge': '对话自由',
                 'mission.title': '你的对话，自由流转',
@@ -4674,7 +4674,7 @@
             },
             'en-US': {
                 'app.titleSuffix': 'Unified Conversation Workspace',
-                'app.subtitle': 'Reconnect Old Conversations (Import / Browse / Edit / Merge) v1.8.12beta',
+                'app.subtitle': 'Reconnect Old Conversations (Import / Browse / Edit / Merge) v1.9.0beta',
                 'app.emotionalNote': 'You are not here to start over. Bring familiar chats here and continue with ta.',
                 'mission.badge': 'CONVERSATION CONTINUITY',
                 'mission.title': 'Not restart. Reconnect the familiar ta.',
@@ -5173,7 +5173,7 @@
             if (currentLanguage === 'en-US') {
                 body.innerHTML = `
                     <h2 style="font-size: 24px; margin-bottom: 8px;">ChatWeave</h2>
-                    <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">Unified Conversation Workspace v1.8.12beta</p>
+                    <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">Unified Conversation Workspace v1.9.0beta</p>
                     <div class="about-info">
                         <p>ChatWeave exists for one reason: when models change, your important conversations should not disappear.</p>
                         <p><strong>We stand with the 0.1% who believe some voices should never be erased.</strong></p>
@@ -5258,7 +5258,7 @@
 
             body.innerHTML = `
                 <h2 style="font-size: 24px; margin-bottom: 8px;">ChatWeave</h2>
-                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">对话迁移助手 v1.8.12beta</p>
+                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">对话迁移助手 v1.9.0beta</p>
                 <div class="about-info">
                     <p>我们专注会话连续性：导入、整理、合并，让聊天记录可迁移、可延续。</p>
                     <p><strong>我们代表那 0.1%，相信有些声音不应被抹去。</strong></p>
@@ -13925,10 +13925,30 @@
                     }
 
                     // 扫描所有分支子节点的后代，正向遍历让最后的分支（主线）排在末尾
+                    // 预先检测是否存在多个孩子的续聊路径，决定是否合并
+                    var hasMultipleContinuations = false;
+                    for (var ci = 0; ci < children.length; ci++) {
+                        var preChild = mapping[children[ci]];
+                        if (!preChild) continue;
+                        var preGcList = Array.isArray(preChild.children) ? preChild.children : [];
+                        for (var gi = 0; gi < preGcList.length; gi++) {
+                            var preGcNode = mapping[preGcList[gi]];
+                            if (!preGcNode) continue;
+                            var preNextGen = Array.isArray(preGcNode.children) ? preGcNode.children : [];
+                            if (preNextGen.length > 0) {
+                                if (preGcList.length > 1) { hasMultipleContinuations = true; break; }
+                            }
+                        }
+                        if (hasMultipleContinuations) break;
+                    }
+                    // 多条续聊路径时，合并所有分支的 QA 对到共享数组
+                    var mergedUserVariants = hasMultipleContinuations ? [] : null;
+                    var mergedAssistantVariants = hasMultipleContinuations ? [] : null;
+                    var deferredContSteps = [];
+
                     for (var ci = 0; ci < children.length; ci++) {
                         var branchChild = mapping[children[ci]];
                         if (!branchChild) continue;
-                        // 检查该子节点的直接子节点
                         var gcList = Array.isArray(branchChild.children) ? branchChild.children : [];
                         for (var gi = gcList.length - 1; gi >= 0; gi--) {
                             var gcNode = mapping[gcList[gi]];
@@ -13937,7 +13957,7 @@
                             if (nextGen.length > 0) {
                                 var gcListAllRequest = false;
                                 if (gcList.length > 1 && !visitedNodeIds.has(gcList[0])) {
-                                    var gcListAllRequest = true;
+                                    gcListAllRequest = true;
                                     for (var gci = 0; gci < gcList.length; gci++) {
                                         var gcnCheck = mapping[gcList[gci]];
                                         var gcnMsgsCheck = gcnCheck ? extractMessagesFromDeepSeekNode(gcnCheck, deepseekModelId) : [];
@@ -13948,14 +13968,14 @@
                                         if (!hasUser) { gcListAllRequest = false; break; }
                                     }
                                     if (gcListAllRequest) {
-                                        var requestVariants = [];
-                                        var allAssistants = [];
+                                        var reqV = hasMultipleContinuations ? mergedUserVariants : [];
+                                        var asstV = hasMultipleContinuations ? mergedAssistantVariants : [];
                                         for (var gci = 0; gci < gcList.length; gci++) {
                                             var gcn = mapping[gcList[gci]];
                                             if (!gcn) continue;
                                             var gcnMsgs = extractMessagesFromDeepSeekNode(gcn, deepseekModelId);
                                             for (var gm = 0; gm < gcnMsgs.length; gm++) {
-                                                if (gcnMsgs[gm].role === 'user') requestVariants.push(gcnMsgs[gm]);
+                                                if (gcnMsgs[gm].role === 'user') reqV.push(gcnMsgs[gm]);
                                             }
                                             visitedNodeIds.add(gcList[gci]);
                                             traversedCount++;
@@ -13965,23 +13985,23 @@
                                                 if (!gcc) continue;
                                                 var gccMsgs = extractMessagesFromDeepSeekNode(gcc, deepseekModelId);
                                                 for (var gccm = 0; gccm < gccMsgs.length; gccm++) {
-                                                    if (gccMsgs[gccm].role === 'assistant') allAssistants.push(gccMsgs[gccm]);
+                                                    if (gccMsgs[gccm].role === 'assistant') asstV.push(gccMsgs[gccm]);
                                                 }
                                                 // 不标记 gcChildren 为 visited，让续聊路径能穿过它们
                                             }
                                         }
-                                        if (requestVariants.length > 0) {
-                                            result.push({ nodeIndex: nodeIndexCounter++, messages: requestVariants, selectIndex: requestVariants.length - 1 });
-                                        }
-                                        if (allAssistants.length > 0) {
-                                            result.push({ nodeIndex: nodeIndexCounter++, messages: allAssistants, selectIndex: allAssistants.length - 1 });
+                                        if (!hasMultipleContinuations) {
+                                            if (reqV.length > 0) {
+                                                result.push({ nodeIndex: nodeIndexCounter++, messages: reqV, selectIndex: reqV.length - 1 });
+                                            }
+                                            if (asstV.length > 0) {
+                                                result.push({ nodeIndex: nodeIndexCounter++, messages: asstV, selectIndex: asstV.length - 1 });
+                                            }
                                         }
                                     }
                                 }
                                 // 继续遍历后续节点
                                 if (gcListAllRequest) {
-                                    // REQUEST 检测已处理全部 gcList 变体，续聊从 gcChildren 的下一层直接进入
-                                    // 跳过 gcChildren 本身（其消息已在 allAssistants 中，走它们会重复）
                                     for (var gci = 0; gci < gcList.length; gci++) {
                                         var gcn = mapping[gcList[gci]];
                                         var gcCh = Array.isArray(gcn.children) ? gcn.children : [];
@@ -13990,8 +14010,15 @@
                                             if (!gcc) continue;
                                             var gccNext = Array.isArray(gcc.children) ? gcc.children : [];
                                             if (gccNext.length > 0) {
-                                                for (var cgi = 0; cgi < gccNext.length; cgi++) {
-                                                    walkNode(gccNext[cgi], branchId);
+                                                if (hasMultipleContinuations) {
+                                                    // 合并模式下延迟续聊，等 QA 组 push 后再 walk
+                                                    for (var cgi = 0; cgi < gccNext.length; cgi++) {
+                                                        deferredContSteps.push({ nodeId: gccNext[cgi], branchId: branchId });
+                                                    }
+                                                } else {
+                                                    for (var cgi = 0; cgi < gccNext.length; cgi++) {
+                                                        walkNode(gccNext[cgi], branchId);
+                                                    }
                                                 }
                                                 visitedNodeIds.add(gcCh[gcci]);
                                             } else {
@@ -14001,9 +14028,30 @@
                                         }
                                     }
                                 } else if (gcList.length === 1) {
-                                    // 修复：单子节点时 walk gcNode（中间节点）而非 nextGen（孙子），
-                                    // 避免跳过中间节点的用户消息提取和其子节点的分支处理
-                                    walkNode(gcList[gi], branchId);
+                                    if (hasMultipleContinuations) {
+                                        // 多路径合并：单子续聊也收集到共享数组
+                                        var smMsgs = extractMessagesFromDeepSeekNode(gcNode, deepseekModelId);
+                                        for (var smi = 0; smi < smMsgs.length; smi++) {
+                                            if (smMsgs[smi].role === 'user') mergedUserVariants.push(smMsgs[smi]);
+                                        }
+                                        visitedNodeIds.add(gcList[gi]);
+                                        traversedCount++;
+                                        for (var sni = 0; sni < nextGen.length; sni++) {
+                                            var snNode = mapping[nextGen[sni]];
+                                            if (!snNode) continue;
+                                            var snMsgs = extractMessagesFromDeepSeekNode(snNode, deepseekModelId);
+                                            for (var snmi = 0; snmi < snMsgs.length; snmi++) {
+                                                if (snMsgs[snmi].role === 'assistant') mergedAssistantVariants.push(snMsgs[snmi]);
+                                            }
+                                            var snNext = Array.isArray(snNode.children) ? snNode.children : [];
+                                            if (snNext.length > 0) {
+                                                for (var sni2 = 0; sni2 < snNext.length; sni2++) walkNode(snNext[sni2], branchId);
+                                            }
+                                            visitedNodeIds.add(nextGen[sni]);
+                                        }
+                                    } else {
+                                        walkNode(gcList[gi], branchId);
+                                    }
                                 } else {
                                     // 非 REQUEST 混合子节点，走原逻辑
                                     for (var ngi = 0; ngi < nextGen.length; ngi++) {
@@ -14012,6 +14060,18 @@
                                 }
                             }
                         }
+                    }
+                    // 多路径合并：创建共享的 QA 变体 MessageNode
+                    if (mergedUserVariants && mergedUserVariants.length > 0) {
+                        result.push({ nodeIndex: nodeIndexCounter++, messages: mergedUserVariants, selectIndex: mergedUserVariants.length - 1 });
+                    }
+                    if (mergedAssistantVariants && mergedAssistantVariants.length > 0) {
+                        result.push({ nodeIndex: nodeIndexCounter++, messages: mergedAssistantVariants, selectIndex: mergedAssistantVariants.length - 1 });
+                    }
+                    // 执行延迟的续聊 walk（合并 QA 组 push 后）
+                    for (var dsi = 0; dsi < deferredContSteps.length; dsi++) {
+                        var ds = deferredContSteps[dsi];
+                        if (!visitedNodeIds.has(ds.nodeId)) walkNode(ds.nodeId, ds.branchId);
                     }
                     // 处理编辑提问节点的子树（REQUEST 类型，有自己的重新生成子节点）
                     // 这些节点在分支收集时未被标记为 visited，现在递归处理
@@ -14224,7 +14284,7 @@ function isCanonicalUuid(value) {
     </script>
     <!--
     ================================================================================
-    ChatWeave v1.8.12beta 改动记录
+    ChatWeave v1.9.0beta 改动记录
     ================================================================================
 
     T01: [已移除] DEEPSEEK_MODEL_MAP 常量、TOOL_FRAGMENT_CONFIG 常量、
